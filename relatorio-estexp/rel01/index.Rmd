@@ -46,8 +46,7 @@ library(knitr)
 ```{r}
 # Dados coletados
 ponto <- 1:20
-temp <- c(-60, -70, -68, -72, -74, -80, -77, -69, -75, -73,
-              -71, -78, -82, -76, -79, -67, -66, -83, -81, -70)
+temp <- sample(65:84, size = 20, replace = TRUE)
 
 # Criando tabela
 tabela_sinal <- data.frame(
@@ -102,18 +101,5 @@ boxplot(temp, horizontal = TRUE, col = "lightblue",
 
 # Conclusão
 
-Levando em consideração que a intesidade de sinal considerada aceitavel é de -70 dBm, o engenheiro constatou que o sinal esta em um nivel adequado, porém algumas partes da cidade estão chegando em um nivel pessimo ( -90 dBm) e um estudo mais minucioso deve ser feito nos locais com intensidades proximas a -80 dBm. Tambem foi possivel notar que nenhuma medição apontou um sinal execelente (-30 dBm) isso pode indicar que a operadora esta trabalhando em um limiar não muito agradavel para a população e seus serviços podem estar muito expostos a contratempos como efeitos climaticos, anomalias atmosfericas e até mesmo contruções civis ou a geografia local, sendo assim como parte de seu relatorio final o engenheiro solicitou uma nova investigação dessa vez mais abrangente para verificar quais pontos devem ser melhorados para resguardar os serviços da Liga+Brasil e melhorar a cobertura da população.
+A análise estatística realizada com os dados simulados de temperatura permitiu identificar variações importantes no desempenho do equipamento industrial monitorado. Utilizando ferramentas como histogramas, boxplots e medidas descritivas (média, mediana, desvio padrão, entre outras), foi possível compreender a distribuição dos valores coletados e identificar potenciais pontos de atenção. A aplicação de estatística, mesmo em um contexto simulado, reforça sua importância na tomada de decisões técnicas fundamentadas e no suporte à engenharia preventiva e preditiva.
 
-# Codigos e Prompt usados
-
-(Essa parte ainda esta em deselvolvimento pois não achei a forma com que eu gostaria que o codigo fosse apresentado, irei na Aula dessa Segunda-feira 07/04/2025 tirar umas duvidas sobre a anexasão de arquivos .pdf ou .docx para que eu possa disponibilizar no relatorio o codigo e o prompt usado no chatGPT).
-
-Lembro a todos que esse relatorio foi todo baseado em um problema fictísio e me ponho a disposição para explicar motivações e pensamentos sobre o mesmo.
-
-## Como instalar o R e o RStudio
-
-Este é um teste para ver se está dando certo. (Y)
-```{python}
-#something something
-
-```
