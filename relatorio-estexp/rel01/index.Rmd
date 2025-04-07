@@ -1,5 +1,5 @@
 ---
-title: "Relatório 01 - Banco de dados e Leem"
+title: "Relatório 01 - Manipulação de dados"
 author: "Kaleb Aquino Mileib"
 date: "07/04/2025"
 header-includes:
@@ -34,8 +34,6 @@ Este relatório tem como objetivo apresenta rum problema relacionado à Engenhar
 
 # Apresentação do relatório
 
-PIPIPI
-
 ```{r}
 # Instale o pacote 'modeest' se ainda não tiver
 if(!require(modeest)) install.packages("modeest")
@@ -55,7 +53,7 @@ tabela_sinal <- data.frame(
 )
 
 # Exibindo tabela
-kable(tabela_sinal, caption = "Tabela 1: Valores de temperatura de um compressor Industrial")
+kable(tabela_sinal, caption = "Valores de temperatura de um compressor Industrial")
 
 ```
 ```{r}
