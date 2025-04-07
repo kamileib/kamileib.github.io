@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Ben Dêivide | DEFIM/UFSJ" />
+<meta name="author" content="Kaleb Aquino Mileib | UFSJ" />
 
 
 <title>Relatórios da Disciplina Estatística Experimental (UFSJ)</title>
@@ -420,8 +420,8 @@ display: none;
 
 
 <h1 class="title toc-ignore">Relatórios da Disciplina Estatística Experimental (UFSJ)</h1>
-<h4 class="author"><a href="https://bendeivide.github.io">Ben Dêivide</a> | <a href="https://ufsj.edu.br">DEFIM/UFSJ</a></h4>
-<h4 class="date">07 abril, 2025, 13h:35min:36seg</h4>
+<h4 class="author"><a href="https://kamileib.github.io">Kaleb Aquino Mileib</a> | <a href="https://ufsj.edu.br">UFSJ</a></h4>
+<h4 class="date">07 abril, 2025, 16h:58min:53seg</h4>
 
 </div>
 
@@ -445,12 +445,7 @@ display: none;
 <hr />
 <div id="mais-informações-sobre-mim" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Mais informações sobre mim</h1>
-<p>Acesse: <a href="%22rel01\index.html%22" target="_blank">Kaleb Aquino Mileib</a>ret</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Este é um bloco de código em Python dentro do RMarkdown</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>x <span class="op">=</span> <span class="dv">10</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>y <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Soma:&quot;</span>, x <span class="op">+</span> y)</span></code></pre></div>
-<pre><code>## Soma: 15</code></pre>
+<p>Acesse: <a href="%22https://kamileib.github.io%22" target="_blank">Kaleb Aquino Mileib</a></p>
 </div>
 <div id="página-dos-alunos-da-disciplina" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Página dos alunos da disciplina</h1>
@@ -492,26 +487,26 @@ display: none;
 </ul></li>
 <li>Instalar Pacotes (No R):</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>pkgs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;rmarkdown&quot;</span>, <span class="st">&quot;knitr&quot;</span>, <span class="st">&quot;bookdown&quot;</span>, <span class="st">&quot;tinytex&quot;</span>, <span class="st">&quot;postcards&quot;</span>, <span class="st">&quot;usethis&quot;</span>, <span class="st">&quot;gitcreds&quot;</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">install.packages</span>(pkgs)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>pkgs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;rmarkdown&quot;</span>, <span class="st">&quot;knitr&quot;</span>, <span class="st">&quot;bookdown&quot;</span>, <span class="st">&quot;tinytex&quot;</span>, <span class="st">&quot;postcards&quot;</span>, <span class="st">&quot;usethis&quot;</span>, <span class="st">&quot;gitcreds&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">install.packages</span>(pkgs)</span></code></pre></div>
 <ul>
 <li>Autenticação e sincronização do RStudio com o Github</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Configurando o nome e email do github</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_git_config</span>(<span class="at">user.name =</span> <span class="st">&quot;YourName&quot;</span>, <span class="at">user.email =</span> <span class="st">&quot;your@mail.com&quot;</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># gerando um token</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">create_github_token</span>() </span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co"># inserindo o token no arquivo &#39;.Renviron&#39;</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">edit_r_environ</span>()</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="do">## armazene seu token na varivel GITHUB_PAT:</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="do">## GITHUB_PAT=ghp_XXXXXXXXXXXXXXXXXXXXXX</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">## após inserir esta linha de comando, finalize o arquivo</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">## acrescentando uma nova linha!!!!</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># Criar localmente o projeto git</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_git</span>()</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># Subi o projeto local ao github</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_github</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Configurando o nome e email do github</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_git_config</span>(<span class="at">user.name =</span> <span class="st">&quot;YourName&quot;</span>, <span class="at">user.email =</span> <span class="st">&quot;your@mail.com&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># gerando um token</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">create_github_token</span>() </span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># inserindo o token no arquivo &#39;.Renviron&#39;</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">edit_r_environ</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## armazene seu token na varivel GITHUB_PAT:</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="do">## GITHUB_PAT=ghp_XXXXXXXXXXXXXXXXXXXXXX</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="do">## após inserir esta linha de comando, finalize o arquivo</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">## acrescentando uma nova linha!!!!</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co"># Criar localmente o projeto git</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_git</span>()</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># Subi o projeto local ao github</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">use_github</span>()</span></code></pre></div>
 </div>
 <div id="diretóriorepositório" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Diretório/Repositório</h2>
@@ -604,9 +599,7 @@ Figure 3.2: Verificando a página.
 <pre><code>- [Relatorio 01 (Insira a data)](rel01/index.html){target=&quot;_blank&quot;}</code></pre>
 <p>Relatórios desenvolvidos:</p>
 <ul>
-<li><a href="rel01/index.html" target="_blank">Relatório 01 (22/04/2022)</a></li>
-<li><a href="rel02/index.html" target="_blank">Relatório 02 (29/04/2022)</a></li>
-<li><a href="rel03/index.html" target="_blank">Relatório 03 (04/05/2022)</a></li>
+<li><a href="rel01/index.html" target="_blank">Relatório 01 (07//04/2025)</a></li>
 <li>…</li>
 </ul>
 </div>

@@ -1,7 +1,7 @@
 ---
-title: "Relatório 01 - Introdução ao R"
-author: "Ben Dêivide"
-date: "12/04/2022"
+title: "Relatório 01 - Banco de dados e Leem"
+author: "Kaleb Aquino Mileib"
+date: "07/04/2025"
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
@@ -24,28 +24,91 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 --- 
 
 # Objetivo
 
-Descrever as ideias básicas sobre o ambiente R:
-
-- Como instalar o R e RStudio;
-- Diferenças entre o R e a IDE RStudio;
-- Como o R trabalha;
-- Comandos elementares;
-- Objetos;
-- Manipulação com objetos;
-- Importação de dados;
-- Pacotes:
-  - Instalação;
-  - Como usar.
+Este relatório tem como objetivo apresenta rum problema relacionado à Engenharia Mecatrônica e sua representação por meio da análise estatística, de forma apenas baseada na realidade. 
 
 # Apresentação do relatório
 
-Diante do objetivo do relatório, apresentaremos nas próximas subseções, os pontos a serem discutidos.
+PIPIPI
+
+```{r}
+# Instale o pacote 'modeest' se ainda não tiver
+if(!require(modeest)) install.packages("modeest")
+library(modeest)
+library(knitr)
+
+```
+```{r}
+# Dados coletados
+ponto <- 1:20
+temp <- c(-60, -70, -68, -72, -74, -80, -77, -69, -75, -73,
+              -71, -78, -82, -76, -79, -67, -66, -83, -81, -70)
+
+# Criando tabela
+tabela_sinal <- data.frame(
+  `Pontos` = ponto,
+  `Temperatura (°C)` = temp
+)
+
+# Exibindo tabela
+kable(tabela_sinal, caption = "Tabela 1: Valores de temperatura de um compressor Industrial")
+
+```
+```{r}
+# Estatísticas
+media <- mean(temp)
+mediana <- median(temp)
+moda <- mlv(temp, method = "mfv")
+desvio_padrao <- sd(temp)
+variancia <- var(temp)
+minimo <- min(temp)
+maximo <- max(temp)
+amplitude <- maximo - minimo
+quartis <- quantile(temp)
+iqr <- IQR(temp)
+
+# Tabela resumo
+tabela_estatisticas <- data.frame(
+  Medida = c("Média", "Mediana", "Moda", "Desvio Padrão", "Variância",
+             "Mínimo", "Máximo", "Amplitude", "1º Quartil (Q1)", "3º Quartil (Q3)", "IQR"),
+  Valor = round(c(media, mediana, moda, desvio_padrao, variancia,
+                  minimo, maximo, amplitude, quartis[2], quartis[4], iqr), 2)
+)
+
+# Exibindo tabela
+kable(tabela_estatisticas, caption = "Tabela 2: Medidas estatísticas dos valores do motor de um compressor")
+
+```
+```{r}
+hist(temp, breaks = 10, col = "steelblue", border = "white",
+     main = "Distribuição dos valores de temperatura",
+     xlab = "Intensidade (dBm)", ylab = "Frequência")
+abline(v = media, col = "red", lwd = 2, lty = 2)
+legend("topright", legend = c("Média"), col = "red", lty = 2, lwd = 2)
+
+```
+
+```{r}
+boxplot(temp, horizontal = TRUE, col = "lightblue",
+        main = "Boxplot dos valores de Temperatura",
+        xlab = "Intensidade (dBm)")
+
+```
+
+# Conclusão
+
+Levando em consideração que a intesidade de sinal considerada aceitavel é de -70 dBm, o engenheiro constatou que o sinal esta em um nivel adequado, porém algumas partes da cidade estão chegando em um nivel pessimo ( -90 dBm) e um estudo mais minucioso deve ser feito nos locais com intensidades proximas a -80 dBm. Tambem foi possivel notar que nenhuma medição apontou um sinal execelente (-30 dBm) isso pode indicar que a operadora esta trabalhando em um limiar não muito agradavel para a população e seus serviços podem estar muito expostos a contratempos como efeitos climaticos, anomalias atmosfericas e até mesmo contruções civis ou a geografia local, sendo assim como parte de seu relatorio final o engenheiro solicitou uma nova investigação dessa vez mais abrangente para verificar quais pontos devem ser melhorados para resguardar os serviços da Liga+Brasil e melhorar a cobertura da população.
+
+# Codigos e Prompt usados
+
+(Essa parte ainda esta em deselvolvimento pois não achei a forma com que eu gostaria que o codigo fosse apresentado, irei na Aula dessa Segunda-feira 07/04/2025 tirar umas duvidas sobre a anexasão de arquivos .pdf ou .docx para que eu possa disponibilizar no relatorio o codigo e o prompt usado no chatGPT).
+
+Lembro a todos que esse relatorio foi todo baseado em um problema fictísio e me ponho a disposição para explicar motivações e pensamentos sobre o mesmo.
 
 ## Como instalar o R e o RStudio
 
