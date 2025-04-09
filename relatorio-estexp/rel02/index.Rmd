@@ -1,7 +1,7 @@
 ---
-title: "Relatório 02 - Como usar o projeto Relatórios"
-author: "Ben Dêivide"
-date: "12/04/2022"
+title: "Relatório 02 - Validação de Distribuições Amostrais no Contexto da Análise de Variância (ANOVA)"
+author: "Kaleb Aquino Mileib"
+date: "10/04/2025"
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
@@ -23,15 +23,116 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 --- 
 
-# Objetivo
+# Introdução
 
-Descrever como realizar os relatórios.
+Na engenharia mecatrônica, especialmente no ramo automotivo, é comum realizar experimentos para comparar o desempenho de diferentes tecnologias ou configurações de componentes. A Análise de Variância (ANOVA) é uma ferramenta estatística essencial para comparar médias de diferentes grupos e verificar se as variações observadas são estatisticamente significativas.
 
-# Apresentação do relatório
+Para que os resultados da ANOVA sejam válidos, é necessário garantir que certas suposições sejam atendidas, especialmente sobre a distribuição das amostras. Este documento mostra como estudar e validar distribuições amostrais usando R, com aplicação em um experimento automotivo.
 
-Aqui será o local para apresentar o material sobre o relatório.
+# Exemplo Prático: Comparação de Consumo entre Tipos de Motores
+
+Imagine um experimento em que estamos avaliando três tipos diferentes de motores (Motor A, Motor B e Motor C) instalados em veículos semelhantes. O objetivo é verificar se há diferença significativa no consumo de combustível (km/L) entre os três grupos.
+
+## Simulação dos Dados
+
+```{r}
+set.seed(123)
+
+# Simulando dados de consumo (km/L)
+motor_a <- rnorm(3, mean = 14.5, sd = 0.5)
+motor_b <- rnorm(3, mean = 13.8, sd = 0.6)
+motor_c <- rnorm(3, mean = 15.2, sd = 0.4)
+
+# Criando o data frame
+consumo <- data.frame(
+  km_l = c(motor_a, motor_b, motor_c),
+  motor = factor(rep(c("A", "B", "C"), each = 3))
+)
+
+print(consumo)
+library(gt)
+
+consumo %>%
+  gt() %>%
+  tab_header(
+    title = "Tabela de Consumo por Tipo de Motor"
+  )
+
+
+library(ggplot2)
+
+ggplot(consumo, aes(x = motor, y = km_l, fill = motor)) +
+  geom_boxplot() +
+  labs(title = "Consumo de Combustível por Tipo de Motor", x = "Motor", y = "Consumo (km/L)") +
+  theme_minimal()
+
+
+```
+
+## Normalidade dos resíduos
+A ANOVA assume que os resíduos seguem uma distribuição normal. Podemos verificar isso com o teste de Shapiro-Wilk e com um gráfico QQ-plot. Neste exemplo, foram gerados 10 valores de cada motor.
+
+```{r}
+set.seed(123)
+
+# Simulando dados de consumo (km/L)
+motor_a2 <- rnorm(10, mean = 14.5, sd = 0.5)
+motor_b2 <- rnorm(10, mean = 13.8, sd = 0.6)
+motor_c2 <- rnorm(10, mean = 15.2, sd = 0.4)
+
+# Criando o data frame
+consumo2 <- data.frame(
+  km_l2 = c(motor_a2, motor_b2, motor_c2),
+  motor2 = factor(rep(c("A", "B", "C"), each = 10))
+)
+
+modelo <- aov(km_l2 ~ motor2, data = consumo2)
+residuos <- residuals(modelo)
+
+# Teste de normalidade
+shapiro.test(residuos)
+
+# QQ-plot
+qqnorm(residuos)
+qqline(residuos)
+
+
+```
+
+## Homogeneidade de variâncias
+Outra suposição é a homogeneidade das variâncias entre os grupos. Podemos verificar isso com o teste de Levene.
+
+```{r}
+
+library(car)
+leveneTest(km_l ~ motor, data = consumo)
+
+```
+
+Aplicando ANOVA - Se o p-valor do teste F for menor que 0.05, rejeitamos a hipótese nula de que todas as médias são iguais.
+
+```{r}
+
+summary(modelo)
+
+
+```
+
+Teste Post-hoc (Tukey)
+Se houver diferença significativa, o teste de Tukey ajuda a identificar quais grupos são diferentes entre si.
+
+```{r}
+
+TukeyHSD(modelo)
+
+```
+
+# Conclusão
+Neste exemplo aplicado à engenharia automotiva, mostramos como estudar e validar as distribuições amostrais no contexto da ANOVA. Validamos a normalidade dos resíduos e a homogeneidade das variâncias para garantir que os resultados da análise fossem confiáveis.
+
+Essas técnicas são fundamentais para qualquer engenheiro que precise comparar desempenhos de sistemas ou componentes, como motores, sensores ou algoritmos de controle, sob diferentes condições.
 
