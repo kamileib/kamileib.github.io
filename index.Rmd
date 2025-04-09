@@ -4,15 +4,15 @@ image: "22.jpeg"
 links:
   - label: GitHub
     url: "https://github.com/kamileib"
-  - label: Email
-    url: "kalebaquinomileib@gmail.com"
   - label: LinkedIn
     url: "https://www.linkedin.com/in/kaleb-aquino-mileib-3237a8214/" 
-  - label: Ralatórios
+  - label: Relatórios
     url: "./relatorio-estexp/index.html"
 output:
   postcards::jolla
 ---
 
 Sou estudante de Engenharia Mecatrônica na UFSJ e atuo como Aprendiz de Processos Siderúrgicos na Gerdau, com conhecimento em manutenção, soldagem e metodologias de solução de problemas. Tenho experiência como professor particular de inglês, participação em projetos de inovação na equipe de competição de robótica ROBOCAP, e uma iniciação científica sobre controle de um braço robótico com estímulos musculares, com artigo publicado no congresso XII COEN. Possuo habilidades técnicas em modelagem 2D/3D, programação (Matlab, Python, C++, CLP), Excel e PowerBI e edição de vídeos.
+
+Email: kalebaquinomileib@gmail.com
  
