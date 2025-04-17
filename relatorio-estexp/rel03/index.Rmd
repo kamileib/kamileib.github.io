@@ -1,7 +1,7 @@
 ---
-title: "Relatório 03 - Distribuição de probabilidade"
-author: "Ben Dêivide"
-date: "12/04/2022"
+title: "Relatório 03 - Simulação Monte Carlo, teste Z e cálculo de poder"
+author: "Kaleb Aquino Mileib"
+date: "17/04/2025"
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
@@ -29,9 +29,116 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Objetivo
 
-Descrever o objetivo do relatório!
+O objetivo deste relatório é avaliar, por meio de simulação Monte Carlo, o comportamento do teste de hipótese para a média populacional com distribuição normal, utilizando o teste Z. Foram simuladas 10.000 amostras de tamanho 30 para calcular o erro tipo I (alpha empírico) e o poder do teste (1 - beta) em diferentes níveis de significância (1%, 5% e 10%) e sob deslocamentos de 1, 2 e 3 erros padrão da média. O estudo busca comparar o alpha empírico ao teórico e analisar como o poder do teste varia conforme o deslocamento da média e o nível de significância.
 
-# Apresentação do relatório
+# Execução da Simulação
 
-Aqui será o local para apresentar o material sobre o relatório.
+## Inicialização de variáveis
+```{r}
+# =============================
+# Simulação Monte Carlo - Teste Z
+# =============================
 
+library(ggplot2)
+library(reshape2)
+
+# Parâmetros
+n <- 30
+mu_0 <- 90
+sigma <- 4
+n_sim <- 10000
+alphas <- c(0.01, 0.05, 0.10)
+
+```
+Esta parte do Código inicializa as variáveis, definindo o tamanho da amostra (n) como 30 valores, a média hipotética (mu_0) como 90, o desvio padrão (sigma) como quatro, o número de simulações como 10000 e os níveis de significância (alphas) para os quais devem ser realizados os testes. 
+
+```{r}
+# Função de simulação - simula o alpha empírico
+simula_erro_ou_poder <- function(mu_real, alpha) {
+  z_crit <- qnorm(1 - alpha / 2)
+  rejeicoes <- numeric(n_sim)
+  
+  for (i in 1:n_sim) {
+    amostra <- rnorm(n, mean = mu_real, sd = sigma)
+    x_barra <- mean(amostra)
+    z_teste <- (x_barra - mu_0) / (sigma / sqrt(n))
+    rejeicoes[i] <- ifelse(abs(z_teste) >= z_crit, 1, 0)
+  }
+  
+  mean(rejeicoes)
+}
+
+```
+A seção acima cria a função que simulará 10000 vezes os dados e gerar um Z crítico do teste Z, para depois armazenar em um vetor as rejeições.
+
+```{r}
+
+# Guardar resultados
+resultados <- data.frame(
+  Alpha = numeric(),
+  Erro_Tipo_I = numeric(),
+  Poder_1sigma = numeric(),
+  Poder_2sigma = numeric(),
+  Poder_3sigma = numeric()
+)
+
+# Loop de simulações
+for (alpha in alphas) {
+  cat("Rodando simulações para alpha =", alpha, "\n")
+  
+  alpha_emp <- simula_erro_ou_poder(mu_real = mu_0, alpha = alpha)
+  
+  desloc_1 <- mu_0 + 1 * (sigma / sqrt(n))
+  desloc_2 <- mu_0 + 2 * (sigma / sqrt(n))
+  desloc_3 <- mu_0 + 3 * (sigma / sqrt(n))
+  
+  poder1 <- simula_erro_ou_poder(mu_real = desloc_1, alpha = alpha)
+  poder2 <- simula_erro_ou_poder(mu_real = desloc_2, alpha = alpha)
+  poder3 <- simula_erro_ou_poder(mu_real = desloc_3, alpha = alpha)
+  
+  resultados <- rbind(resultados, data.frame(
+    Alpha = alpha,
+    Erro_Tipo_I = round(alpha_emp, 4),
+    Poder_1sigma = round(poder1, 4),
+    Poder_2sigma = round(poder2, 4),
+    Poder_3sigma = round(poder3, 4)
+  ))
+}
+
+```
+Esta etapa cria um loop para rodar as simulações. Para cada valor de alpha, calcula um alpha empírico utilizando a função do bloco anterior, considerando a hipótese de mu_real ser igual a mu_0. Nisso, é calculado o poder considerando os três cenários da proposta, deslocando a média 1, 2 e 3x. Por fim, simula o poder empírico para cada cenário. 
+
+```{r}
+
+# Mostrar tabela final
+print(resultados)
+
+# Reformatar para gráfico
+resultados_long <- melt(resultados, id.vars = "Alpha")
+
+# Criar gráfico
+grafico <- ggplot(resultados_long, aes(x = factor(Alpha), y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Erro Tipo I e Poder Empírico por Nível de Significância",
+       x = "Nível de Significância (α)",
+       y = "Proporção",
+       fill = "Métrica") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2")
+
+# Mostrar gráfico
+print(grafico)
+
+# Salvar gráfico
+ggsave("grafico_teste_Z.png", plot = grafico, width = 10, height = 6)
+
+# Fim
+cat("Simulações concluídas. Resultados exportados.\n")
+
+
+```
+Por fim, os resultados são guardados em um data frame, que gera uma tabela. E os mesmos valores estão dispostos no gráfico. 
+
+# Conclusão
+
+Com este experimento, é possível perceber que nosso alpha empírico está muito próximo do alpha teórico, mesmo com poucos erros para cima ou para baixo. Também é possível notar que quanto maior maior o deslocamento da média, maior o poder do teste, e quanto menor o alpha, menor o poder.
