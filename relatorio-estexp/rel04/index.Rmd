@@ -1,7 +1,7 @@
 ---
-title: "Relatório 02"
-author: "Ben Dêivide"
-date: "12/04/2022"
+title: "Relatório 04"
+author: "Kaleb Aquino Mileib"
+date: "01/05/2025"
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
@@ -30,36 +30,161 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Objetivo
 
-Descrever o objetivo do relatório!
+Neste relatório, deve-se analisar um experimento em DIC (Delineamento Inteiramente Causalizado), realizando a Análise Descritiva geral e de cada tratamento (com média, desvio padrão e coeficiente de variação) e uma análise gráfica de Boxplot. Também é necessário realizar uma Análise de Variância, com hipóteses H0 e H1, tabela de ANAVA, e análise gráfica de resíduos. 
 
-Aula 05 - Introdução à Experimentação (slide)
+# Desenvolvimento
 
-elementos de um experimento: fatores - variáveis controladas (velocidade do motor);
-                             Níveis - valores testados (RPM);
-                             Tratamentos - combinações dos níveis (fat1-n1, fat1-n2);
-                             Respostas - O que se mede (depende dos fatores e níveis).
+Para trabalhar neste relatório, será necessário utilizar o banco de dados abaixo proposto pelo professor. Com ele, devemos avaliar o **Erro Quadrático Médio (EQM)** dos 5 algorítmos de controle: **PID, LQR, Fuzzy, Controle Adaptativo e por Redes Neurais**. Nele, temos a estrutura  de **5 tratamentos** (métodos de controle), **6 repetições** para cada e **1 variável de resposta**. 
 
-Quando o resultado da um valor entre aqueles dados pelos faotres e níveis, deve-se extrapolar e realizar um estudo de regressão. Verifica-se o ponto ótimo de funcionamento de um motor, que pode estar entre os pontos dados. 
-*qual melhor nível gera uma resposta melhor?*
+```{r}
+# Banco de dados
+controle <- c(rep("PID", 6), rep("LQR", 6), rep("Fuzzy", 6), rep("Adaptativo", 6), rep("Redes Neurais", 6))
+eqm <- c(0.322, 0.338, 0.428, 0.354, 0.356, 0.436,
+         0.298, 0.229, 0.253, 0.262, 0.329, 0.294,
+         0.444, 0.427, 0.387, 0.527, 0.450, 0.302,
+         0.345, 0.286, 0.257, 0.299, 0.259, 0.274,
+         0.231, 0.199, 0.275, 0.255, 0.216, 0.288)
 
-Princípio da Experimentação (Fisher)
+dados <- data.frame(controle = as.factor(controle), eqm = eqm)
 
-Repetição - replicar tratamentos e estimar a variabilidade. Se testar em diferentes máquinas, cada nível, e a média dos valores ser um resultado esperado com o nível, prova sua eficiência por repetição. 
+print(dados)
 
-Casualização - sorteia a alocação de tratamentos para enviar um viés sistemáticos. Coloque os tratamentos dispostos de formas diferentes para evitar coincidências enviesadas, não controladas. (Dispor amostras de um mesmo nivel próximo a um ar condicionado, aleatprizar a ordem de testes).
+```
 
-Controle local (blocagem) - Criar subregiões que dependem de uma variável externa, e sortear os níveis em cada uma delas, de forma que se analiza todas as amostras em cada região, verificando a eficácia de cada. 
+## Análise Descritiva
 
-Teste F pode informar a relação entre a variação do tratamento e variação do acaso: 
-*F = var_tratamento/var_acaso, var_x -> s^2 = SQD/Grau_lib* 
-A blocagem retira os graus de liberdade da variação do acaso, que aumenta o valor da var_acaso e diminui a var_tratamento
+Para a realização da Análise Descritiva, foi necessário realizar a média (X barra), o desvio padrão (S) e o coeficiente de variação (CV). 
 
-ex: Avaliar o desempenho de 3 algorítmos na velocidade de um motor
-fatores - PID, LQR, FUZZY
-níveis - 3
-res
+```{r}
 
-# Apresentação do relatório
+media_geral <- mean(dados$eqm)
+dp_geral <- sd(dados$eqm)
+cv_geral <- 100 * dp_geral / media_geral
 
-Aqui será o local para apresentar o material sobre o relatório.
+cat("Média:", media_geral, "\nDesvio Padrão:", dp_geral, "\nCoef. de Variação (CV%):", cv_geral)
 
+```
+Conforme é possível ver acima, estes são os valores gerais de média (0.3206667), Desvio Padrão (0.0807996) e Coeficiente de Variação (25.19738). 
+
+```{r}
+
+#por tratamento
+
+library(dplyr)
+
+dados %>%
+  group_by(controle) %>%
+  summarise(
+    media = mean(eqm),
+    desvio_padrao = sd(eqm),
+    cv = 100 * sd(eqm) / mean(eqm)
+  )
+```
+Acima, é possível ver os dados de Média, Desvio Padrão e Coeficiente de Variância para cada controlador. E segue abaixo o gráfico boxplot por tipo de controle, analisando o erro quadrático médio (EQM) de cada um.
+
+Sobre o gráfico, é possível perceber que os métodos de controle Adaptativo e LQR são bem parecidos, quanto à sua distribuição de EQMs, visto que possuem uma mediana relativamente próxima e variações absolutas semelhantes, apesar do LQR possuir maior distância entre seus limites. 
+
+Também é possível observar que a distribuição dos valores de EQM dos controles por Fuzzy e PID tendem a um dos limites. No caso do Fuzzy, seus EQMs estão mais distribuidos entre a mediana e o primeiro quartil. Já no PID, o contrário se verifica, onde os valores se distribuem mais entre a mediana e o terceiro quartil. 
+
+
+```{r}
+
+#boxplot
+
+boxplot(eqm ~ controle, data = dados, col = "skyblue", 
+        main = "Boxplot do EQM por Tipo de Controle", 
+        ylab = "Erro Quadrático Médio (EQM)")
+
+
+```
+
+## Análise de Variância
+
+Para a Analise de Variância, deve ser estabelecida a relação entre as hipóteses H₀ e H₁, uma tabela ANAVA e uma análise gráfica de resíduos.
+
+Para a relação das hipóteses, segue a explicação abaixo: 
+
+**H₀: μ₁ = μ₂ = μ₃ = μ₄ = μ₅ (os controladores têm a mesma média de EQM)**
+
+**H₁: ao menos um controlador difere significativamente**
+
+Abaixo, podemos ver a tabela ANAVA utilizando a função sugerida pelo professor.
+
+```{r}
+modelo <- aov(eqm ~ controle, data = dados)
+summary(modelo)
+
+
+```
+
+Com isso, podemos interpretar os resultados e afirmar que como o valor P é muito menor que o alpha definido (0,05), a hipótese H0 pode ser descartada, confirmando que existe uma diferença significativa entre os tipos de controle. 
+
+```{r}
+par(mfrow = c(2,2))
+plot(modelo)
+
+```
+
+É possível observar que: 
+
+Sobre o gráfico *Residuals vs fitted*, é possível perceber que há uma aleatoriedade quanto a distribuição dos resíduos ao longo da linha 0, menos nos últimos valores, que possuem alguns outliers e com uma inclinação na linha de fitted em vermelho. 
+
+há uma normalidade da dsitribuição dos resíduos, visto o *Gráfico Q-Q* ser aproximadamente linear, com apenas os dois últimos pontos se destacando, porém nada fora do normal.
+
+O gráfico *Scale Location* apresenta uma homocedasticidade (variância constante) que está, no geral, distribuida de forma aleatória acima e abaixo da linha de regrssão (vermelha), apenas com os primeiros e últimos valores possuindo maior distribuiçãoa baixo da linha.
+
+E por fim, o gráfico *Constant Leverage: Residuals vs Factor Levels* apresenta um tratamento razoavelmente centrado em 0 com uma certa simetria. Portanto, pode-se dizer que os erros estão aleatoriamente distribuidos. 
+
+## Verificação
+
+Em aula, foi pedido para pesquisar como calcular os Graus de Liberdade (GL), Soma dos Quadrados (SQ) e Quadrado Médio (QM) e comparar com os valores dados pelo R no código abaixo: 
+
+```{r}
+# Tabela ANOVA manual
+SQT <- sum((tapply(dados$eqm, dados$controle, mean) - mean(dados$eqm))^2 * 6) # 6 repetições
+SQR <- sum((dados$eqm - fitted(modelo))^2)
+SQTotal <- sum((dados$eqm - mean(dados$eqm))^2)
+
+GLT <- length(unique(dados$controle)) - 1
+GLR <- length(dados$eqm) - length(unique(dados$controle))
+GLTotal <- length(dados$eqm) - 1
+
+QMT <- SQT / GLT
+QMR <- SQR / GLR
+QMTotal <- QMT + QMR
+F <- QMT / QMR
+
+tabela_anova_manual <- data.frame(
+  Fonte = c("Tratamento", "Resíduo", "Total"),
+  GL = c(GLT, GLR, GLTotal),
+  SQ = c(SQT, SQR, SQTotal),
+  QM = c(QMT, QMR, QMTotal),
+  F = c(F, NA, NA)
+)
+tabela_anova_manual
+```
+
+Portanto, os GL representam a quantidade de informações independentes disponíveis para variarem. O **GL dos tratamentos (GLT)** é feito pelo N° de tratamentos - 1, sendo GLT = 4. O **GL dos resíduos (GLR)** é o N° de observações - N° de tratamentos, que é GLR = 25. O total é a soma dos dois. Comparando com a tabela, os valores indicados pelo R são verdadeiros. 
+
+Sobre a SQ, que significa a variabilidade associada a cada fonte. Ao dividir em dois grupos, **SQ dos Tratamentos (SQT)** e **SQ dos Resíduos (SQR)**, deve-se para o primeiro, calcular a média de cada grupo, subtrair a média geral, elevar ao quadrado e multiplicar pelo número de repetições (6 por grupo), resultando em SQT = 0,132028. Para o segundo, deve-se calcular a diferença entre o valor observado e o valor ajustado e elevar ao quadrado. O resultado é SQR = 0,057301. O total é a soma de ambos. Comparando com a tabela, os valores coincidem.
+
+O Quadrado Médio (QM) é feito pelo cálculo da SQ dividida pelo respectivo GL, representando a variabilidade média. Temos o **Quadrado Médio dos Tratamentos (QMT)** sendo a divisão entre GLT e SQT, resultando em QMT = 0,033007. E temos o **Quadrado Médio dos Resíduos (QMR)** representado pela divisão entre GLR e SQR, com QMR = 0,002292. O total pode ser representado pela soma dos dois, sendo QMTotal = 0,035299. Os resultados coincidem com a tabela. 
+
+# Conclusão
+
+A partir da análise realizada neste relatório, foi possível avaliar e comparar o desempenho de cinco algoritmos de controle (PID, LQR, Fuzzy, Adaptativo e Redes Neurais) quanto ao Erro Quadrático Médio (EQM), utilizando um experimento em Delineamento Inteiramente Casualizado (DIC). A análise descritiva inicial, composta pela média, desvio padrão e coeficiente de variação, forneceu uma visão geral e individual de cada tratamento, permitindo identificar diferenças preliminares nos comportamentos dos métodos de controle avaliados.
+
+O gráfico boxplot complementou a análise descritiva, evidenciando a distribuição dos EQMs em cada tipo de controle. Observou-se que os métodos Adaptativo e LQR apresentaram padrões similares em suas distribuições, enquanto os métodos Fuzzy e PID demonstraram assimetrias distintas, sugerindo variações de desempenho mais específicas nesses algoritmos.
+
+A Análise de Variância (ANOVA) confirmou estatisticamente que há diferença significativa entre os métodos de controle analisados, com valor-p muito inferior ao nível de significância adotado (α = 0,05). Isso indica a rejeição da hipótese nula (H₀), que assumia igualdade entre as médias dos tratamentos, reforçando a conclusão de que ao menos um dos controladores se destaca em relação aos demais.
+
+A análise dos resíduos mostrou que os pressupostos da ANOVA foram razoavelmente atendidos: os resíduos apresentaram distribuição aproximadamente normal, homocedasticidade e ausência de padrões sistemáticos, apesar da presença de alguns valores atípicos. Esses aspectos garantem a confiabilidade dos resultados inferenciais obtidos.
+
+Por fim, a verificação manual dos componentes da ANOVA — graus de liberdade (GL), soma dos quadrados (SQ), quadrado médio (QM) e estatística F — confirmou a consistência dos cálculos realizados pelo R, reforçando a compreensão prática dos conceitos estatísticos envolvidos.
+
+Dessa forma, o experimento permitiu não apenas identificar diferenças significativas entre os métodos de controle, como também consolidar o uso das ferramentas estatísticas para análise de experimentos em DIC, sendo um recurso valioso na comparação de desempenho entre diferentes técnicas.
+
+
+Sites utilizados de referência para os estudos:
+https://fernandafperes.com.br/blog/interpretacao-boxplot/
+https://rpubs.com/iabrady/residual-analysis
