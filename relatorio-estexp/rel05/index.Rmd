@@ -1,0 +1,188 @@
+---
+title: "Relatório 05"
+author: "Kaleb Aquino Mileib"
+date: "12/05/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+--- 
+
+# Objetivo
+
+Descrever o objetivo do relatório!
+
+# Apresentação do relatório
+
+Aqui será o local para apresentar o material sobre o relatório.
+
+```{r}
+# Pacotes necessários
+if(!require(dplyr)) install.packages("dplyr", dependencies = TRUE)
+library(dplyr)
+library(gt)
+
+# -----------------------------
+# 1. Preparação dos dados
+# -----------------------------
+piso <- factor(rep(1:4, each = 3))  # Blocos
+motor <- factor(rep(c("A", "B", "C"), times = 4))  # Tratamentos
+consumo <- c(12.1, 10.9, 9.8,
+             11.4, 10.5, 9.5,
+             13.0, 11.8, 10.2,
+             12.7, 11.0, 10.0)
+
+dados <- data.frame(Piso = piso, Motor = motor, Consumo = consumo)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 3, 1),
+    colors = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(4, 6, 1),
+    colors = "#FFB2B2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = seq(7, 9, 1),
+    colors = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(10, 12, 1),
+    colors = "#FFB2B2"
+  )
+
+# -----------------------------
+# 2. Análise Descritiva
+# -----------------------------
+
+# Geral
+media_geral <- mean(dados$Consumo)
+dp_geral <- sd(dados$Consumo)
+cv_geral <- (dp_geral / media_geral) * 100
+
+cat("Análise Descritiva Geral:\n")
+cat("Média Geral:", round(media_geral, 2), "\n")
+cat("Desvio Padrão Geral:", round(dp_geral, 2), "\n")
+cat("Coeficiente de Variação (CV %):", round(cv_geral, 2), "\n\n")
+
+# Por Tratamento
+cat("Análise Descritiva por Motor:\n")
+descr_trat <- dados %>%
+  group_by(Motor) %>%
+  summarise(
+    Média = mean(Consumo),
+    Desvio_Padrão = sd(Consumo),
+    CV = (sd(Consumo) / mean(Consumo)) * 100
+  )
+print(descr_trat)
+
+# -----------------------------
+# 3. Boxplot dos tratamentos
+# -----------------------------
+boxplot(Consumo ~ Motor, data = dados,
+        col = c("lightblue", "lightgreen", "salmon"),
+        main = "Consumo de Energia por Marca de Motor",
+        ylab = "Consumo (Wh)", xlab = "Motor")
+
+# -----------------------------
+# 4. ANOVA - Modelo com blocos
+# -----------------------------
+modelo <- aov(Consumo ~ Motor + Piso, data = dados)
+cat("\n\nResumo da ANOVA (modelo):\n")
+summary(modelo)
+
+# -----------------------------
+# 5. Análise gráfica dos resíduos
+# -----------------------------
+par(mfrow = c(2, 2))
+plot(modelo)
+
+# -----------------------------
+# 6. Cálculo Manual da ANOVA
+# -----------------------------
+
+# Soma dos quadrados total
+SQTotal <- sum((dados$Consumo - mean(dados$Consumo))^2)
+
+# Soma dos quadrados do tratamento
+SQT <- sum(tapply(dados$Consumo, dados$Motor, mean)^2 * 4) - (sum(dados$Consumo)^2 / 12)
+
+# Soma dos quadrados do bloco
+SQB <- sum(tapply(dados$Consumo, dados$Piso, mean)^2 * 3) - (sum(dados$Consumo)^2 / 12)
+
+# Soma dos quadrados do resíduo
+SQR <- SQTotal - SQT - SQB
+
+# Graus de liberdade
+GLT <- nlevels(dados$Motor) - 1
+GLB <- nlevels(dados$Piso) - 1
+GLR <- nrow(dados) - (GLT + GLB + 1)
+
+# Quadrados médios
+QMT <- SQT / GLT
+QMB <- SQB / GLB
+QMR <- SQR / GLR
+
+# Valores F
+FT <- QMT / QMR
+FB <- QMB / QMR
+
+# Tabela ANOVA manual
+anova_manual <- data.frame(
+  Fonte = c("Tratamento", "Bloco", "Resíduo", "Total"),
+  GL = c(GLT, GLB, GLR, GLT + GLB + GLR),
+  SQ = round(c(SQT, SQB, SQR, SQTotal), 4),
+  QM = round(c(QMT, QMB, QMR, NA), 4),
+  F = round(c(FT, FB, NA, NA), 4)
+)
+
+cat("\n\nTabela ANOVA Calculada Manualmente:\n")
+print(anova_manual)
+
+# -----------------------------
+# 7. Conclusão
+# -----------------------------
+cat("\nConclusão:\n")
+cat("Se o valor-p da ANOVA for < 0.05, rejeitamos H0: os motores possuem consumos diferentes.\n")
+cat("Caso contrário, não há evidência estatística de diferença.\n")
+
+
+
+```
+
