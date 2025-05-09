@@ -331,7 +331,7 @@ plot(modelo)
 
 ```
 
-## Conclusão
+# Conclusão
 
 Com base nos resultados obtidos ao longo da análise, pode-se concluir que tanto o tipo de motor quanto o tipo de piso influenciam significativamente o consumo de energia durante o percurso. A utilização do Delineamento em Blocos Casualizado (DBC) foi adequada, pois permitiu controlar a variabilidade entre os tipos de piso e aumentou a precisão na comparação entre os motores.
 
@@ -341,7 +341,7 @@ A análise de variância reforçou essas observações, indicando que as diferen
 
 Por fim, a análise gráfica dos resíduos demonstrou que os pressupostos do modelo foram razoavelmente atendidos, permitindo confiar nos resultados da ANOVA. Assim, pode-se afirmar com segurança que há evidências estatísticas de que tanto o tipo de motor quanto o tipo de piso impactam o consumo energético, sendo relevante considerar esses fatores em decisões relacionadas à eficiência energética em percursos.
 
-## Código
+# Código
 
 Segue abaixo o **código utilizado** no relatório 05, que foi colocado nesta seção apenas para facilitar a visualização na página:
 
