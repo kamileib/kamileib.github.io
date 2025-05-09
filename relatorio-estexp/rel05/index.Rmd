@@ -24,27 +24,24 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 --- 
 
 # Objetivo
 
-Descrever o objetivo do relatório!
+Neste relatório, deve-se analisar um experimento em DBC (Delineamento em Blocos Causalizado), que agrupa as variáveis e tratamentos em grupos para realizarmos uma análise, a fim de aumentar a precisão dos testes e controlar a variabilidade entre blocos.
 
-# Apresentação do relatório
+Muito semelhante ao Relatório 04, deve-se realizar uma Análise Descritiva geral e de cada tratamento (com média, desvio padrão e coeficiente de variação) e uma análise gráfica de Boxplot. Também é necessário realizar uma Análise de Variância, com hipóteses H0 e H1, tabela de ANAVA, e análise gráfica de resíduos. 
 
-Aqui será o local para apresentar o material sobre o relatório.
+# Desenvolvimento
+
+Para este relatório, devemos analisar o banco de dados abaixo, que relaciona o **Consumo de Energia para Percurso (Wh)** de **3 tipos de motores**, avaliando cada um em **4 tipos de pisos (cimento, borracha, carpete, asfalto)**. 
 
 ```{r}
-# Pacotes necessários
-if(!require(dplyr)) install.packages("dplyr", dependencies = TRUE)
 library(dplyr)
 library(gt)
 
-# -----------------------------
-# 1. Preparação dos dados
-# -----------------------------
 piso <- factor(rep(1:4, each = 3))  # Blocos
 motor <- factor(rep(c("A", "B", "C"), times = 4))  # Tratamentos
 consumo <- c(12.1, 10.9, 9.8,
@@ -69,67 +66,509 @@ dados |>
   data_color(
     columns = everything(),
     rows = seq(1, 3, 1),
-    colors = "#f2f2f2"
+    palette = "#f2f2f2"
   ) |>
   data_color(
     columns = everything(),
     rows = seq(4, 6, 1),
-    colors = "#FFB2B2"
+    palette = "#FFB2B2"
   )|>
   data_color(
     columns = everything(),
     rows = seq(7, 9, 1),
-    colors = "#f2f2f2"
+    palette = "#f2f2f2"
   ) |>
   data_color(
     columns = everything(),
     rows = seq(10, 12, 1),
-    colors = "#FFB2B2"
+    palette = "#FFB2B2"
   )
 
-# -----------------------------
-# 2. Análise Descritiva
-# -----------------------------
+```
+
+## Análise Descritiva
+
+Para a realizar a Análise Descritiva, foi necessário calcular a média (X barra), o desvio padrão (S) e o coeficiente de variação (CV), de forma geral e de cada tratamento, conforme o código abaixo. 
+
+### Análise Geral
+
+Conforme é possível ver abaixo, estes são os valores gerais de média (11.075), Desvio Padrão (1.145049) e Coeficiente de Variação (10.33904). 
+
+```{r}
 
 # Geral
 media_geral <- mean(dados$Consumo)
 dp_geral <- sd(dados$Consumo)
 cv_geral <- (dp_geral / media_geral) * 100
 
-cat("Análise Descritiva Geral:\n")
-cat("Média Geral:", round(media_geral, 2), "\n")
-cat("Desvio Padrão Geral:", round(dp_geral, 2), "\n")
-cat("Coeficiente de Variação (CV %):", round(cv_geral, 2), "\n\n")
+tabela_estatisticas <- data.frame(
+  Estatística = c("Média Geral", "Desvio Padrão Geral", "Coeficiente de Variação (%)"),
+  Valor = c(media_geral, dp_geral, cv_geral)
+)
+
+tabela_estatisticas |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )
+
+```
+
+### Análise por Tratamento
+Nas tabelas abaixo, é possível ver a Média, o Desvio Padrão e o Coeficiente de Variância de cada tipo de motor, e de cada tipo de piso.
+
+```{r}
 
 # Por Tratamento
-cat("Análise Descritiva por Motor:\n")
 descr_trat <- dados %>%
   group_by(Motor) %>%
   summarise(
-    Média = mean(Consumo),
-    Desvio_Padrão = sd(Consumo),
-    CV = (sd(Consumo) / mean(Consumo)) * 100
+    Média = round(mean(Consumo), 3),
+    Desvio_Padrão = round(sd(Consumo), 3),
+    CV = round((sd(Consumo) / mean(Consumo)) * 100, 3)
   )
-print(descr_trat)
 
-# -----------------------------
+descr2 <- dados %>%
+  group_by(Piso) %>%
+  summarise(
+    Média = round(mean(Consumo), 3),
+    Desvio_Padrão = round(sd(Consumo), 3),
+    CV = round((sd(Consumo) / mean(Consumo)) * 100, 3)
+  )
+
+descr_trat |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )
+
+descr2 |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = 4,
+    palette = "#f2f2f2"
+  )
+
+```
+
+### Boxplot
+
+Seguindo abaixo, é possível perceber os gráficos Boxplot do consumo de energia por marca de motor (A, B, C), e consumo por tipo de piso (1, 2, 3, 4). 
+
+É possível analisar que no gráfico dos motores, os tipos A e C possuem uma distribuição bem equilibrada de consumo, enquanto o motor B tende a uma distribuição de valores mais próxima de seu terceiro quartil. 
+
+Sobre o gráfico dos pisos, se destacam os números 3 e 4, que possuem uma distribuição maior para o primeiro e terceiro quartis, respectivamente. Válido ressaltar que o piso 3 possui uma mediana de valor mais alto entre os quatro, enquanto o piso 2 possui a menor. 
+
+
+```{r}
+
 # 3. Boxplot dos tratamentos
-# -----------------------------
+
 boxplot(Consumo ~ Motor, data = dados,
         col = c("lightblue", "lightgreen", "salmon"),
         main = "Consumo de Energia por Marca de Motor",
         ylab = "Consumo (Wh)", xlab = "Motor")
 
-# -----------------------------
+boxplot(Consumo ~ Piso, data = dados,
+        col = c("lightblue", "lightgreen", "salmon"),
+        main = "Consumo de Energia por Tipo de Piso",
+        ylab = "Consumo (Wh)", xlab = "Piso")
+
+```
+
+## Análise de Variância
+
+Para a Analise de Variância, deve ser estabelecida a relação entre as hipóteses H₀ e H₁, uma tabela ANAVA e uma análise gráfica de resíduos. 
+
+Para a relação das hipóteses, segue a explicação abaixo: 
+
+**H₀: μ₁ = μ₂ = μ₃ = μ₄ = μ₅**
+
+**H₁: ao menos um difere significativamente**
+
+Abaixo, podemos ver a tabela ANAVA utilizando a função sugerida pelo professor. Para a representação em uma tabela mais elaborada, foi necessário converter a função *summary(modelo)* para um data frame *data_summary*. 
+
+```{r}
+
 # 4. ANOVA - Modelo com blocos
-# -----------------------------
+
 modelo <- aov(Consumo ~ Motor + Piso, data = dados)
-cat("\n\nResumo da ANOVA (modelo):\n")
 summary(modelo)
 
-# -----------------------------
-# 5. Análise gráfica dos resíduos
-# -----------------------------
+#Converter SUMMARY para Data Frame
+data_summary <- data.frame(unclass(summary(modelo)), check.names = FALSE)
+
+print(data_summary)
+
+x <- "NA"
+
+data_summary2 <- data.frame(
+  Fonte = c("Motor", "Piso", "Resíduo"),
+  GL = c(2, 3, 6),
+  `Soma dos Quadrados` = c(11.765, 2.296, 0.362),
+  `Quadrado Médio` = c(5.883, 0.765, 0.060),
+  `Valor F` = c(97.59, 12.70, x),
+  `Pr(>F)` = c(0.0000265, 0.00522, x)
+)
+
+data_summary2 |>
+  gt() |>
+  tab_header(title = "Tabela ANOVA - DBC (Motor + Piso)") |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 1, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(2, 2, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(3, 3, 1),
+    palette = "#f2f2f2"
+  )
+
+```
+
+Com isso, é possível afirmar que ambos os valores P (dos motores e dos pisos) é muito menor que o alpha definido como (0,05), portanto, pode-se confirmar que há diferença entre os tipos de motores (A, B, C) e pisos (cimento, borracha, carpete, asfalto). 
+
+## Análise gráfica dos resíduos
+
+Sobre a análise de resíduos, é possível observar que:
+
+No gráfico **Residuals vs fitted**, é possível perceber que há uma distribuição não-linear dos resíduos, podendo observar quase uma parábola. Caso fizessemos uma análise mais aprofundada, poderia até ser possível encontrar a relação quadrárica que define o modelo. 
+
+
+Há uma normalidade da dsitribuição dos resíduos, visto o Gráfico **Q-Q** ser aproximadamente linear, com apenas alguns dos últimos pontos se destacando, porém nada fora do normal.
+
+O gráfico **Scale Location** apresenta uma homocedasticidade (variância constante) que está, no geral, distribuida de forma aleatória acima e abaixo da linha de regrssão (vermelha).
+
+E por fim, o gráfico **Constant Leverage: Residuals vs Factor Levels** apresenta um tratamento realmente aleatório, onde não existem casos que influenciam muito o modelo. 
+
+```{r}
+# 5. Análise resíduos
+
+par(mfrow = c(2, 2))
+plot(modelo)
+
+```
+
+## Conclusão
+
+Com base nos resultados obtidos ao longo da análise, pode-se concluir que tanto o tipo de motor quanto o tipo de piso influenciam significativamente o consumo de energia durante o percurso. A utilização do Delineamento em Blocos Casualizado (DBC) foi adequada, pois permitiu controlar a variabilidade entre os tipos de piso e aumentou a precisão na comparação entre os motores.
+
+A análise descritiva mostrou que o motor C teve, em média, o menor consumo energético, o que pode indicar maior eficiência energética nesse contexto experimental. Já o motor A apresentou o maior consumo médio, sendo potencialmente o menos eficiente entre os três avaliados. Em relação aos pisos, o tipo 3 (carpete) apresentou a maior média de consumo, enquanto o tipo 2 teve a menor, o que pode estar relacionado à resistência que cada tipo de piso oferece ao deslocamento.
+
+A análise de variância reforçou essas observações, indicando que as diferenças encontradas são estatisticamente significativas, com valores de p muito inferiores ao nível de significância adotado (α = 0,05). Portanto, rejeita-se a hipótese nula de que todos os motores e pisos possuem médias iguais de consumo.
+
+Por fim, a análise gráfica dos resíduos demonstrou que os pressupostos do modelo foram razoavelmente atendidos, permitindo confiar nos resultados da ANOVA. Assim, pode-se afirmar com segurança que há evidências estatísticas de que tanto o tipo de motor quanto o tipo de piso impactam o consumo energético, sendo relevante considerar esses fatores em decisões relacionadas à eficiência energética em percursos.
+
+Segue abaixo o código utilizado no relatório 05, que foi colocado nesta seção apenas para facilitar a visualização na página:
+
+<details>
+<summary>Código</summary>
+
+```
+
+library(dplyr)
+library(gt)
+
+piso <- factor(rep(1:4, each = 3))  # Blocos
+motor <- factor(rep(c("A", "B", "C"), times = 4))  # Tratamentos
+consumo <- c(12.1, 10.9, 9.8,
+             11.4, 10.5, 9.5,
+             13.0, 11.8, 10.2,
+             12.7, 11.0, 10.0)
+
+dados <- data.frame(Piso = piso, Motor = motor, Consumo = consumo)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 3, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(4, 6, 1),
+    palette = "#FFB2B2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = seq(7, 9, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(10, 12, 1),
+    palette = "#FFB2B2"
+  )
+
+# Geral
+media_geral <- mean(dados$Consumo)
+dp_geral <- sd(dados$Consumo)
+cv_geral <- (dp_geral / media_geral) * 100
+
+tabela_estatisticas <- data.frame(
+  Estatística = c("Média Geral", "Desvio Padrão Geral", "Coeficiente de Variação (%)"),
+  Valor = c(media_geral, dp_geral, cv_geral)
+)
+
+tabela_estatisticas |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )
+
+# Por Tratamento
+descr_trat <- dados %>%
+  group_by(Motor) %>%
+  summarise(
+    Média = round(mean(Consumo), 3),
+    Desvio_Padrão = round(sd(Consumo), 3),
+    CV = round((sd(Consumo) / mean(Consumo)) * 100, 3)
+  )
+
+descr2 <- dados %>%
+  group_by(Piso) %>%
+  summarise(
+    Média = round(mean(Consumo), 3),
+    Desvio_Padrão = round(sd(Consumo), 3),
+    CV = round((sd(Consumo) / mean(Consumo)) * 100, 3)
+  )
+
+descr_trat |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )
+
+descr2 |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 1,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 2,
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = 3,
+    palette = "#f2f2f2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = 4,
+    palette = "#f2f2f2"
+  )
+
+# 3. Boxplot dos tratamentos
+
+boxplot(Consumo ~ Motor, data = dados,
+        col = c("lightblue", "lightgreen", "salmon"),
+        main = "Consumo de Energia por Marca de Motor",
+        ylab = "Consumo (Wh)", xlab = "Motor")
+
+boxplot(Consumo ~ Piso, data = dados,
+        col = c("lightblue", "lightgreen", "salmon"),
+        main = "Consumo de Energia por Tipo de Piso",
+        ylab = "Consumo (Wh)", xlab = "Piso")
+
+# 4. ANOVA - Modelo com blocos
+
+modelo <- aov(Consumo ~ Motor + Piso, data = dados)
+summary(modelo)
+
+#Converter SUMMARY para Data Frame
+data_summary <- data.frame(unclass(summary(modelo)), check.names = FALSE)
+
+print(data_summary)
+
+x <- "NA"
+
+data_summary2 <- data.frame(
+  Fonte = c("Motor", "Piso", "Resíduo"),
+  GL = c(2, 3, 6),
+  `Soma dos Quadrados` = c(11.765, 2.296, 0.362),
+  `Quadrado Médio` = c(5.883, 0.765, 0.060),
+  `Valor F` = c(97.59, 12.70, x),
+  `Pr(>F)` = c(0.0000265, 0.00522, x)
+)
+
+data_summary2 |>
+  gt() |>
+  tab_header(title = "Tabela ANOVA - DBC (Motor + Piso)") |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 1, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(2, 2, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(3, 3, 1),
+    palette = "#f2f2f2"
+  )
+
+# 5. Análise resíduos
+
 par(mfrow = c(2, 2))
 plot(modelo)
 
@@ -172,17 +611,12 @@ anova_manual <- data.frame(
   F = round(c(FT, FB, NA, NA), 4)
 )
 
-cat("\n\nTabela ANOVA Calculada Manualmente:\n")
 print(anova_manual)
-
-# -----------------------------
-# 7. Conclusão
-# -----------------------------
-cat("\nConclusão:\n")
-cat("Se o valor-p da ANOVA for < 0.05, rejeitamos H0: os motores possuem consumos diferentes.\n")
-cat("Caso contrário, não há evidência estatística de diferença.\n")
-
 
 
 ```
 
+</details>
+
+
+Links de referência: https://library.virginia.edu/data/articles/diagnostic-plots
