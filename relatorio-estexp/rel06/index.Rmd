@@ -1,0 +1,320 @@
+---
+title: "Relatório 06"
+author: "Kaleb Aquino Mileib"
+date: "22/05/2022"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+--- 
+
+# Objetivo
+
+Neste relatório será necessário apresentar um estudo sobre o procedimento de comparação múltipla **Scott-Knot**, além de mostrar sua aplicação no R para obter os resultados.
+
+# Desenvolvimento 
+
+## Introdução
+
+O procedimento de **Scott-Knott** é amplamente utilizado em experimentos com o objetivo de comparar tratamentos distintos. Sua finalidade é agrupar as médias em conjuntos estatisticamente homogêneos, buscando **minimizar a  soma de quadrados dentro**; e **maximizando-a entre os grupos**, **sem sobrepô-los**. Para isso, é necessário ordenar as médias para que suas respectivas classificações sejam possíveis, e determinar o número de partições possíveis, a fim de realizar a maximização entre esses grupos.
+
+Portanto, o teste Scott-Knott é uma técnica de partição que visa minimizar ou maximizar a **soma dos quadrados entre grupos** a partir de médias de tratamentos ordenadas, a fim de testar o quão significativo é essa divisão dos tratamentos utilizando a **razão de verossimilhança**.
+
+Utilizaremos um exemplo da área de **Engenharia Mecatrônica**, os controladores de relatórios passados, comparando seus Erros Quadráticos Médios (EQM).
+
+## Passos do algoritmo:
+
+Primeiro, precisamos definir as hipóteses \( H_0 \) e \( H_1 \):
+
+- \( H_0 \): As médias dos grupos são iguais (\( G_1 = G_2 \))
+- \( H_1 \): As médias dos grupos são diferentes (\( G_1 \ne G_2 \))
+
+Assumindo  \( G_1 \) e \( G_2 \) como sendo os totais dos dois grupos de médias com k1 e k2 tratamentos cada, ou seja, os totais de tratamentos em cada grupo. A estatística utilizada no teste é dada por:
+
+\[
+\lambda = \frac{\pi}{2(\pi - 2)} \cdot \frac{B_0}{\sigma^2_0}
+\]
+
+Onde:
+
+- \( \pi \approx 3{,}1416 \): constante irracional
+- \( B_0 \): soma de quadrados entre grupos:
+
+\[
+B_0 = \frac{T_1^2}{k_1} + \frac{T_2^2}{k_2} - \frac{(T_1 + T_2)^2}{k_1 + k_2}
+\]
+
+- \( T_1 \), \( T_2 \): somas das médias dos grupos \( G_1 \) e \( G_2 \)
+- \( k_1 \), \( k_2 \): número de tratamentos em cada grupo
+
+O Estimador de Máxima Verossimilhança, definido da seguinte forma:
+
+
+\[
+\sigma^2_0 = \frac{1}{k + v} \left[ \sum_{i=1}^r (y_{i.} - \bar{y}_{..})^2 + v \cdot s_y^2 \right]
+\]
+
+Onde:
+
+- \( s_y^2 \): estimativa da variância residual (QMResíduo)
+- \( v \): graus de liberdade do resíduo
+- \( r \): número de repetições por tratamento
+
+Sob a hipótese nula, a estatística \( \lambda \sim \chi^2_{k(\pi - 2)} \). A decisão é tomada da seguinte forma:
+
+- Se \( \lambda \leq \lambda_{crítico} \): não se rejeita \( H_0 \)
+- Se \( \lambda > \lambda_{crítico} \): rejeita-se \( H_0 \), indicando diferença significativa entre os grupos
+
+
+## Simulação no R
+
+A seguir, simulamos dados representando o desempenho de cinco controladores de velocidade em termos de **Erro Quadrático Médio (EQM)**:
+
+```{r}
+library(ScottKnott)
+library(gt)
+library(dplyr)
+
+# Simulando os dados
+set.seed(42)
+controlador <- gl(5, 6, labels = c("PID", "LQR", "Fuzzy", "Adaptativo", "RedesNeurais"))
+eqm <- c(
+  rnorm(6, mean = 5, sd = 0.5),
+  rnorm(6, mean = 4.8, sd = 0.5),
+  rnorm(6, mean = 3.0, sd = 0.4),
+  rnorm(6, mean = 3.2, sd = 0.4),
+  rnorm(6, mean = 2.9, sd = 0.3)
+)
+
+dados <- data.frame(controlador, eqm)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 6, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(7, 12, 1),
+    palette = "#FFB2B2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(13, 18, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(19, 24, 1),
+    palette = "#FFB2B2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = seq(25, 30, 1),
+    palette = "#f2f2f2"
+  )
+
+```
+
+Abaixo, temos a tabela ANOVA e a separação de grupos gerada pelo teste Scott-Knot:
+
+```{r}
+
+# ANOVA
+modelo <- aov(eqm ~ controlador, data = dados)
+summary(modelo)
+
+# Converter resultado ANOVA para data frame
+anova_df <- summary(modelo)[[1]] |> 
+  tibble::rownames_to_column("Fonte de Variação") |>
+  rename(
+    `GL` = Df,
+    `SQ` = `Sum Sq`,
+    `QM` = `Mean Sq`,
+    `Valor-F` = `F value`,
+    `Pr(>F)` = `Pr(>F)`
+  )
+
+# Exibir tabela ANOVA com formatação
+anova_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - ANOVA do Modelo**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 3
+  )
+
+```
+
+
+```{r}
+
+# Aplicação do teste Scott-Knott
+sk <- SK(modelo)
+summary(sk)
+
+
+```
+
+# Conclusão
+
+O procedimento de Scott-Knott demonstrou-se uma ferramenta estatística eficaz para a comparação de médias entre tratamentos, sobretudo quando o objetivo é realizar agrupamentos não sobrepostos com significância estatística. Sua capacidade de maximizar a variância entre grupos e minimizar dentro dos grupos permite uma análise mais clara e objetiva dos resultados.
+
+No exemplo simulado com cinco tipos de controladores, o teste conseguiu identificar dois grupos distintos em termos de desempenho médio, medido pelo Erro Quadrático Médio (EQM). O grupo com melhores resultados foi composto pelos controladores Fuzzy, Adaptativo e Redes Neurais, enquanto PID e LQR apresentaram desempenhos estatisticamente superiores (ou seja, piores em termos de EQM).
+
+A aplicação prática no R mostrou-se direta e acessível, principalmente com o uso de pacotes como ScottKnott, gt e dplyr, que facilitam a execução da análise e a visualização dos resultados. Isso torna o teste Scott-Knott uma excelente escolha para experimentos que exigem comparações múltiplas com clareza estatística e visual.
+
+Em suma, a análise permitiu concluir que a escolha do controlador influencia significativamente no desempenho, e o uso de métodos estatísticos adequados é essencial para respaldar tecnicamente decisões em projetos de engenharia e automação.
+
+# Referências
+
+Pinheiro, N. O. **Aplicação do Método Scott-Knott em Estudo de Brusone no Trigo**. Tese (Bacharelado em Estatística) - Faculdade de Estatística, Universidade de Brasília. Brasília. 2017.
+
+# Código
+
+<details>
+<summary>Código</summary>
+
+```
+library(ScottKnott)
+library(gt)
+library(dplyr)
+
+# Simulando os dados
+set.seed(42)
+controlador <- gl(5, 6, labels = c("PID", "LQR", "Fuzzy", "Adaptativo", "RedesNeurais"))
+eqm <- c(
+  rnorm(6, mean = 5, sd = 0.5),
+  rnorm(6, mean = 4.8, sd = 0.5),
+  rnorm(6, mean = 3.0, sd = 0.4),
+  rnorm(6, mean = 3.2, sd = 0.4),
+  rnorm(6, mean = 2.9, sd = 0.3)
+)
+
+dados <- data.frame(controlador, eqm)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 6, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(7, 12, 1),
+    palette = "#FFB2B2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(13, 18, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(19, 24, 1),
+    palette = "#FFB2B2"
+  )|>
+  data_color(
+    columns = everything(),
+    rows = seq(25, 30, 1),
+    palette = "#f2f2f2"
+  )
+
+# ANOVA
+modelo <- aov(eqm ~ controlador, data = dados)
+summary(modelo)
+
+# Converter resultado ANOVA para data frame
+anova_df <- summary(modelo)[[1]] |> 
+  tibble::rownames_to_column("Fonte de Variação") |>
+  rename(
+    `GL` = Df,
+    `SQ` = `Sum Sq`,
+    `QM` = `Mean Sq`,
+    `Valor-F` = `F value`,
+    `Pr(>F)` = `Pr(>F)`
+  )
+
+# Exibir tabela ANOVA com formatação
+anova_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - ANOVA do Modelo**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 3
+  )
+  
+# Aplicação do teste Scott-Knott
+sk <- SK(modelo)
+summary(sk)
+
+
+```
+
+</details>
+
