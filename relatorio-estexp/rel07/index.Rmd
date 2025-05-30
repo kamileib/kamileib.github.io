@@ -1,7 +1,7 @@
 ---
 title: "Relatório 07"
 author: Kaleb Aquino Mileib"
-date: "12/04/2022"
+date: "29/04/2025"
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
@@ -24,15 +24,349 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 --- 
 
 # Objetivo
 
-Descrever o objetivo do relatório!
+O objetivo deste relatório é investigar a adequação do modelo de análise de variância (ANAVA) tradicional frente às pressuposições estatísticas fundamentais para sua validade, com foco na análise de resíduos. A ANAVA pressupõe que os erros (ou resíduos) do modelo sejam normalmente distribuídos, com variâncias homogêneas entre os grupos (homocedasticidade) e independentes. Quando essas suposições não são atendidas, os resultados do teste F podem ser enganosos, levando a interpretações equivocadas sobre a significância dos fatores estudados. Assim, este trabalho busca aplicar ferramentas diagnósticas gráficas e testes formais para avaliar essas suposições e, diante de violações, propor soluções metodológicas adequadas.
 
-# Apresentação do relatório
+Para ilustrar essas situações, é apresentado um experimento simulado utilizando dados artificiais com características específicas, como a presença de valores extremos (outliers), que intencionalmente comprometem a normalidade e a homocedasticidade dos resíduos. O objetivo é demonstrar como a análise de resíduos pode evidenciar esses problemas e como estratégias corretivas - como transformações nos dados ou o uso de métodos não paramétricos, como o teste de Kruskal-Wallis - podem ser aplicadas de forma eficaz. O relatório visa, portanto, reforçar a importância da validação dos pressupostos da ANAVA como etapa essencial na análise de experimentos, garantindo que as conclusões estatísticas sejam confiáveis e representem com precisão os fenômenos investigados.
 
-Aqui será o local para apresentar o material sobre o relatório.
+# Desenvolvimento
+
+## Descrição do Experimento Simulado
+
+Neste estudo, simulamos um experimento com o objetivo de comparar a eficácia de três métodos de controle automático (PID, LQR e Fuzzy) aplicados a um sistema térmico. A variável de interesse é o **tempo de estabilização** do sistema, medido em segundos, que representa o tempo necessário para o sistema atingir um estado estacionário após uma perturbação. Cada método de controle é avaliado com **10 réplicas**, totalizando 30 observações no experimento. O fator experimental é o **Tipo de Controle**, com três níveis: PID, LQR e Fuzzy.
+
+Para fins didáticos e de investigação estatística, foi introduzida uma situação anômala no grupo Fuzzy: **três observações com valores extremamente altos (25, 28 e 30 segundos)** foram incluídas intencionalmente. Esses valores são **outliers graves**, muito distantes da média esperada do grupo. O objetivo é analisar o impacto desses outliers nas pressuposições da ANAVA tradicional, em especial a **normalidade dos resíduos e a homogeneidade das variâncias**, e propor soluções adequadas quando essas condições são violadas. A análise será conduzida com ferramentas gráficas e testes formais, seguida de uma abordagem alternativa baseada em métodos não paramétricos.
+
+
+```{r}
+
+# Carregar bibliotecas
+library(gt)
+library(dplyr)
+
+# Gerar os dados
+set.seed(456)
+Controle <- rep(c("PID", "LQR", "Fuzzy"), each = 10)
+
+Tempo <- c(
+  rnorm(10, mean = 10, sd = 0.5),        # PID
+  rnorm(10, mean = 9, sd = 0.6),         # LQR
+  c(rnorm(7, mean = 11, sd = 0.4), 25, 30, 28)  # Fuzzy com outliers
+)
+
+dados <- data.frame(Controle, Tempo)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 10, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(11, 20, 1),
+    palette = "#FFB2B2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(21, 30, 1),
+    palette = "#f2f2f2"
+  ) 
+
+
+```
+
+## Tabela ANOVA
+
+A tabela de ANAVA apresentada mostra a comparação entre três métodos de controle automático (PID, LQR e Fuzzy), com a variável resposta sendo o tempo de estabilização. O valor de p (0,0101) é inferior ao nível de significância de 5%, o que indica que há uma diferença estatisticamente significativa entre pelo menos dois dos grupos analisados. Ou seja, rejeita-se a hipótese nula de igualdade das médias, sugerindo que o tipo de controle influencia o tempo de estabilização do processo térmico.
+
+```{r}
+
+modelo <- aov(Tempo ~ Controle, data = dados)
+summary(modelo)
+
+# Converter resultado ANOVA para data frame
+anova_df <- summary(modelo)[[1]] |> 
+  tibble::rownames_to_column("Fonte de Variação") |>
+  rename(
+    `GL` = Df,
+    `SQ` = `Sum Sq`,
+    `QM` = `Mean Sq`,
+    `Valor-F` = `F value`,
+    `Pr(>F)` = `Pr(>F)`
+  )
+
+# Exibir tabela ANOVA com formatação
+anova_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - ANOVA do Modelo**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 3
+  )
+
+
+```
+
+
+## Gráficos de Resíduos
+
+```{r}
+
+par(mfrow = c(2, 2))
+plot(modelo)
+
+
+```
+
+
+O gráfico **"Resíduos vs Valores Ajustados"** revela uma tendência visível nos resíduos, com destaque para três observações extremamente altas (28, 29 e 30 segundos) que pertencem ao grupo Fuzzy. Essa tendência indica que o **modelo não está conseguindo capturar adequadamente a variabilidade dos dados**, o que sugere a violação da suposição de homocedasticidade (variância constante dos resíduos) e, possivelmente, de independência. 
+
+Já o **gráfico Q-Q Plot** mostra que os resíduos **não seguem uma distribuição normal**: os pontos esperados se afastam significativamente da linha teórica nos extremos, novamente devido aos outliers no grupo Fuzzy, o que configura uma clara violação da normalidade dos resíduos.
+
+O **gráfico Scale-Location** reforça a heterocedasticidade, pois evidencia que a variabilidade dos resíduos aumenta com os valores ajustados. A linha crescente sugere que as **variâncias não são constantes ao longo dos grupos**, invalidando outro pressuposto essencial da ANAVA. 
+
+Por fim, o **gráfico Resíduos vs Níveis do Fator (Tipo de Controle)** mostra que os maiores resíduos ocorrem exclusivamente no grupo Fuzzy, com valores **altamente discrepantes em relação aos demais níveis**. Essa distorção compromete a comparação entre os grupos e pode enviesar os resultados da análise.
+
+Diante dessas evidências, conclui-se que as premissas básicas da ANAVA não foram atendidas, comprometendo a validade da análise estatística. Como alternativas, pode-se aplicar transformações nos dados, como logaritmo ou raiz quadrada, visando estabilizar as variâncias e aproximar os resíduos da normalidade. Outra solução viável seria adotar métodos robustos ou não paramétricos, como o teste de Kruskal-Wallis, que não pressupõe normalidade nem homogeneidade de variância. Além disso, é recomendável realizar análises com e sem os outliers, comparando os resultados e justificando a abordagem escolhida com base no contexto do experimento.
+
+## Testes Complementares
+
+A análise dos pressupostos da ANAVA foi complementada com dois testes estatísticos: o **Shapiro-Wilk** para normalidade dos resíduos e o **Bartlett** para homogeneidade das variâncias. Ambos os testes retornaram valores de **p extremamente baixos (p < 0,01)**, indicando que os pressupostos fundamentais da ANAVA **não foram atendidos** neste conjunto de dados.
+
+O **teste de Shapiro-Wilk** foi utilizado para verificar se os resíduos do modelo seguem uma distribuição normal, como exige a ANAVA clássica. O valor de W = 0,75428 com um **p-valor de 1.069e-05** indica uma forte evidência contra a normalidade dos resíduos. Isso significa que os dados apresentam uma distribuição distorcida, provavelmente influenciada pela presença de outliers, como já identificado nos gráficos de diagnóstico.
+
+Já o **teste de Bartlett** foi empregado para verificar a **homogeneidade das variâncias** entre os grupos (PID, LQR e Fuzzy). O resultado, com **p-valor = 2.012e-14**, indica que as variâncias são significativamente diferentes entre os grupos. Ou seja, a suposição de variâncias iguais — essencial para a validade do teste F da ANAVA — foi violada.
+
+Esses dois resultados confirmam que a aplicação direta da ANAVA não é apropriada neste caso. Como alternativa, recomenda-se aplicar **transformações nos dados** (como logaritmo ou raiz quadrada), ou empregar testes **não paramétricos**, como o **Kruskal-Wallis**, que são mais robustos a essas violações.
+
+
+```{r}
+
+shapiro.test(residuals(modelo))  # Teste de normalidade
+bartlett.test(Tempo ~ Controle, data = dados)  # Homogeneidade de variâncias
+
+# Criar dataframe do teste de Shapiro-Wilk
+shapiro_df <- data.frame(
+  Estatística = "W",
+  Valor = 0.75428,
+  `p-valor` = 1.069e-05
+)
+
+# Exibir tabela formatada
+shapiro_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - Teste de Normalidade (Shapiro-Wilk)**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 5,
+    use_seps = FALSE
+  )
+
+
+```
+
+## Solução: Teste de Kruskal-Wallis
+A ANAVA não paramétrica de Kruskal-Wallis é uma alternativa à ANOVA tradicional quando os pressupostos desta não são atendidos, especialmente a normalidade dos resíduos e a homogeneidade de variâncias. Ao contrário da ANOVA clássica, o teste de Kruskal-Wallis não exige que os dados sigam uma distribuição normal, o que o torna adequado para dados assimétricos ou com distribuição desconhecida.
+
+Outro ponto forte do teste de Kruskal-Wallis é sua robustez a outliers. Como ele trabalha com ranks (posições ordenadas dos valores) em vez dos próprios valores numéricos, os efeitos de observações extremas são minimizados, reduzindo seu impacto nos resultados da análise.
+
+Se o valor-p for menor que o nível de significância adotado (por exemplo, 0,05), podemos concluir que há pelo menos um grupo com mediana significativamente diferente dos demais.
+
+```{r}
+
+kruskal.test(Tempo ~ Controle, data = dados)
+
+
+
+```
+
+##  BoxPlot
+
+```{r}
+
+boxplot(Tempo ~ Controle, data = dados,
+        col = c("skyblue", "lightgreen", "salmon"),
+        main = "Tempo de Estabilização por Tipo de Controle",
+        ylab = "Tempo (s)")
+
+
+```
+
+# Conclusão
+
+Este relatório demonstrou, com base em um experimento simulado, como a presença de outliers pode comprometer os pressupostos fundamentais da ANAVA tradicional. Os testes formais de normalidade (Shapiro-Wilk) e homogeneidade de variâncias (Bartlett) revelaram violações significativas, reforçadas pelas análises gráficas dos resíduos. Tais violações invalidam a aplicação do teste F da ANAVA, podendo levar a conclusões incorretas sobre a influência do fator estudado.
+
+Como alternativa metodológica, foi aplicada a ANAVA não paramétrica de Kruskal-Wallis, que não exige normalidade nem igualdade de variâncias. Este teste confirmou a existência de diferenças estatisticamente significativas entre os grupos, mesmo diante dos valores extremos. Por sua natureza robusta, o teste de Kruskal-Wallis mostrou-se mais adequado para analisar os dados simulados neste estudo.
+
+Concluímos, portanto, que a validação dos pressupostos da ANAVA é uma etapa crítica na análise de experimentos. Em casos de violação, recomenda-se o uso de transformações ou métodos estatísticos robustos, como testes não paramétricos, para garantir que as inferências realizadas sejam confiáveis e representem com fidelidade os fenômenos observados.
+
+
+# Código
+
+<details>
+<summary>Código</summary>
+
+```
+
+# Carregar bibliotecas
+library(gt)
+library(dplyr)
+
+# Gerar os dados
+set.seed(456)
+Controle <- rep(c("PID", "LQR", "Fuzzy"), each = 10)
+
+Tempo <- c(
+  rnorm(10, mean = 10, sd = 0.5),        # PID
+  rnorm(10, mean = 9, sd = 0.6),         # LQR
+  c(rnorm(7, mean = 11, sd = 0.4), 25, 30, 28)  # Fuzzy com outliers
+)
+
+dados <- data.frame(Controle, Tempo)
+
+# Exibir tabela formatada
+dados |>
+  gt() |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(1, 10, 1),
+    palette = "#f2f2f2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(11, 20, 1),
+    palette = "#FFB2B2"
+  ) |>
+  data_color(
+    columns = everything(),
+    rows = seq(21, 30, 1),
+    palette = "#f2f2f2"
+  ) 
+modelo <- aov(Tempo ~ Controle, data = dados)
+summary(modelo)
+
+# Converter resultado ANOVA para data frame
+anova_df <- summary(modelo)[[1]] |> 
+  tibble::rownames_to_column("Fonte de Variação") |>
+  rename(
+    `GL` = Df,
+    `SQ` = `Sum Sq`,
+    `QM` = `Mean Sq`,
+    `Valor-F` = `F value`,
+    `Pr(>F)` = `Pr(>F)`
+  )
+
+# Exibir tabela ANOVA com formatação
+anova_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - ANOVA do Modelo**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 3
+  )
+par(mfrow = c(2, 2))
+plot(modelo)
+
+shapiro.test(residuals(modelo))  # Teste de normalidade
+bartlett.test(Tempo ~ Controle, data = dados)  # Homogeneidade de variâncias
+
+# Criar dataframe do teste de Shapiro-Wilk
+shapiro_df <- data.frame(
+  Estatística = "W",
+  Valor = 0.75428,
+  `p-valor` = 1.069e-05
+)
+
+# Exibir tabela formatada
+shapiro_df |>
+  gt() |>
+  tab_header(
+    title = md("**Tabela - Teste de Normalidade (Shapiro-Wilk)**")
+  ) |>
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "white"),
+                 cell_fill(color = "black")),
+    locations = cells_column_labels()
+  ) |>
+  tab_style(
+    style = cell_text(align = "center"),
+    locations = cells_body(columns = everything())
+  ) |>
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 5,
+    use_seps = FALSE
+  )
+
+kruskal.test(Tempo ~ Controle, data = dados)
+
+boxplot(Tempo ~ Controle, data = dados,
+        col = c("skyblue", "lightgreen", "salmon"),
+        main = "Tempo de Estabilização por Tipo de Controle",
+        ylab = "Tempo (s)")
+
+
+```
+
+</details>
+
 

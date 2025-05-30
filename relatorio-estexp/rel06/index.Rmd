@@ -196,7 +196,6 @@ anova_df |>
 sk <- SK(modelo)
 summary(sk)
 
-
 ```
 
 # Conclusão

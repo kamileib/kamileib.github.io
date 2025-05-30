@@ -1,0 +1,71 @@
+---
+title: "Relatório 08"
+author: "Kaleb Aquino Mileib"
+date: "05/06/2025"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+--- 
+
+# Objetivo
+
+Aula 16 - Ao=plicar regressão linear e polinomial a dados com fator quantitativo
+
+Quando usar regressão na ANOVA? 
+* quando os fatores forem quantitativos (mais informações além dos níveis dados, como um valor entre A=0 e B=2). Cria-se, com base nos pontos, uma reta e um envelope que define sua precisão. Quando os dados saem do banco de dados, perde-se a confiança.
+
+* Quando se quer modelar a tendênciada variável de resposta (máxima e mínima para quais valores?)
+
+>>> se atentar ao pedir a ANOVA pra IA ao conferiro s graus de liberdade. GL = n_total_porcentagens - 1. No caso do meu exemplo, são 5 distâncias com 4 repetições cada. Portanto, 4GL. 
+
+Fazer análise de resíduos, teste de ***ver slide***
+
+modelos polinomiais: 
+mod 1: Yi = Bo + B1X1 + Eij
+mod 2: Yi = Bo + B1X1 + Eij + B2X1^2
+mod 3: Yi = Bo + B1X1 + Eij + B2X1^2 + B3X1^3
+
+Tomada de decisão: Qual o melhor modelo? Analisar modelo a modelo e interpretar.
+1 - verificar a análise de resíduo pelos testes do slide. se estiver ok, pode confiar na ANOVA
+2 - Analisar o Coeficiente de Determinação, representado pelo pelo **R^2**, que quanto mais próximo de 1 melhor. R^2 depende do número de parâmetros do modelo, logo modelo 3 terá um R maior **O que não indica que mod 3 é o melhor**. Levar em consideração o critério do **mODELO pARCIMONIOSO**, analisar no mod 1 que é mais simples. 
+3 - Conferir o desvio de regressão, que mostra a soma de quadrados e o teste F ou T não der significativo, há sobras que o modelo não conseguiu explicar. 
+4 - Coeficiente de determinação ajustado, expressão do slide R^2_ajustado = (()) **No código, nã incluir o Bo no numero de parâmetros**.
+5 - analisar a praticidade, QUE É: o modelo consegue explicar em termos práticos?
+
+Na análise do mod1, é importante ressaltar a avalisação dos valores de P, que devem ser == 0(Ou menores que 0.5), indicando que Bo =/= 0.
+
+no mod1, a análise dos desvios de regressão quando P é menor que 0, indicam que o modelo 1 não explica tudo. Portanto ele é significativo.
+
+no mod2, avaliar os valores P e conferir o R^2. Se for muito maior que o R^2 do mod1, significa que ele pode ser um modelo melhor. Ao olhar o efeito linear, o efeito quadrático e o desvio de regressão, todos devem ser menores que 5%. Se o ultimo for menor que 5%, ainda tem coisas que o modelo não pegou. 
+
+Se no mod3, o valor P de B2 for maior que 0,5 quer dizer que talvez, o B2 não devesse estar na equação do modelo. Porém, conferindo na segunda tabela, o valor P do efeito quadrático pode ser menor que 0,5. 
+
+Nos slides, o melhor modelo seria o 2. 
+
+Verificar a curva ajustada, mudando o poly(x, n, etc) com N para o valor do exponente do modelo. 
+
+# Apresentação do relatório
+
+Aqui será o local para apresentar o material sobre o relatório.
+
