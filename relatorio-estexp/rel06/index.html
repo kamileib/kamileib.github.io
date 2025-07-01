@@ -237,6 +237,106 @@ ul.task-list{list-style: none;}
 
 
 
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } 
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.at { color: #204a87; } 
+code span.bn { color: #0000cf; } 
+code span.cf { color: #204a87; font-weight: bold; } 
+code span.ch { color: #4e9a06; } 
+code span.cn { color: #8f5902; } 
+code span.co { color: #8f5902; font-style: italic; } 
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.dt { color: #204a87; } 
+code span.dv { color: #0000cf; } 
+code span.er { color: #a40000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #0000cf; } 
+code span.fu { color: #204a87; font-weight: bold; } 
+code span.im { } 
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.kw { color: #204a87; font-weight: bold; } 
+code span.op { color: #ce5c00; font-weight: bold; } 
+code span.ot { color: #8f5902; } 
+code span.pp { color: #8f5902; font-style: italic; } 
+code span.sc { color: #ce5c00; font-weight: bold; } 
+code span.ss { color: #4e9a06; } 
+code span.st { color: #4e9a06; } 
+code span.va { color: #000000; } 
+code span.vs { color: #4e9a06; } 
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -451,6 +551,9 @@ entre os grupos</li>
 <p>A seguir, simulamos dados representando o desempenho de cinco
 controladores de velocidade em termos de <strong>Erro Quadrático Médio
 (EQM)</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ScottKnott)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
 <pre><code>## 
 ## Anexando pacote: &#39;dplyr&#39;</code></pre>
 <pre><code>## Os seguintes objetos são mascarados por &#39;package:stats&#39;:
@@ -459,6 +562,56 @@ controladores de velocidade em termos de <strong>Erro Quadrático Médio
 <pre><code>## Os seguintes objetos são mascarados por &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Simulando os dados</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>controlador <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">5</span>, <span class="dv">6</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;PID&quot;</span>, <span class="st">&quot;LQR&quot;</span>, <span class="st">&quot;Fuzzy&quot;</span>, <span class="st">&quot;Adaptativo&quot;</span>, <span class="st">&quot;RedesNeurais&quot;</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>eqm <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">rnorm</span>(<span class="dv">6</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="fl">0.5</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="fu">rnorm</span>(<span class="dv">6</span>, <span class="at">mean =</span> <span class="fl">4.8</span>, <span class="at">sd =</span> <span class="fl">0.5</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="fu">rnorm</span>(<span class="dv">6</span>, <span class="at">mean =</span> <span class="fl">3.0</span>, <span class="at">sd =</span> <span class="fl">0.4</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">rnorm</span>(<span class="dv">6</span>, <span class="at">mean =</span> <span class="fl">3.2</span>, <span class="at">sd =</span> <span class="fl">0.4</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">rnorm</span>(<span class="dv">6</span>, <span class="at">mean =</span> <span class="fl">2.9</span>, <span class="at">sd =</span> <span class="fl">0.3</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>dados <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(controlador, eqm)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># Exibir tabela formatada</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>dados <span class="sc">|&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="fu">tab_style</span>(</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">list</span>(<span class="fu">cell_text</span>(<span class="at">weight =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>),</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>                 <span class="fu">cell_fill</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>)),</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    <span class="at">locations =</span> <span class="fu">cells_column_labels</span>()</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="fu">tab_style</span>(</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">cell_text</span>(<span class="at">align =</span> <span class="st">&quot;center&quot;</span>),</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    <span class="at">locations =</span> <span class="fu">cells_body</span>(<span class="at">columns =</span> <span class="fu">everything</span>())</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>(),</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>    <span class="at">rows =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">1</span>),</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">&quot;#f2f2f2&quot;</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>(),</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    <span class="at">rows =</span> <span class="fu">seq</span>(<span class="dv">7</span>, <span class="dv">12</span>, <span class="dv">1</span>),</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">&quot;#FFB2B2&quot;</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>(),</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>    <span class="at">rows =</span> <span class="fu">seq</span>(<span class="dv">13</span>, <span class="dv">18</span>, <span class="dv">1</span>),</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">&quot;#f2f2f2&quot;</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>(),</span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a>    <span class="at">rows =</span> <span class="fu">seq</span>(<span class="dv">19</span>, <span class="dv">24</span>, <span class="dv">1</span>),</span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">&quot;#FFB2B2&quot;</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>  )<span class="sc">|&gt;</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>(),</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>    <span class="at">rows =</span> <span class="fu">seq</span>(<span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">1</span>),</span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">&quot;#f2f2f2&quot;</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>  )</span></code></pre></div>
 <div id="uzrffbtcvu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#uzrffbtcvu table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -930,11 +1083,44 @@ height: 0px !important;
 </div>
 <p>Abaixo, temos a tabela ANOVA e a separação de grupos gerada pelo
 teste Scott-Knot:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># ANOVA</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>modelo <span class="ot">&lt;-</span> <span class="fu">aov</span>(eqm <span class="sc">~</span> controlador, <span class="at">data =</span> dados)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">summary</span>(modelo)</span></code></pre></div>
 <pre><code>##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
 ## controlador  4  41.79  10.447   47.73 2.38e-11 ***
 ## Residuals   25   5.47   0.219                     
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Converter resultado ANOVA para data frame</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>anova_df <span class="ot">&lt;-</span> <span class="fu">summary</span>(modelo)[[<span class="dv">1</span>]] <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">&quot;Fonte de Variação&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="st">`</span><span class="at">GL</span><span class="st">`</span> <span class="ot">=</span> Df,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="st">`</span><span class="at">SQ</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">Sum Sq</span><span class="st">`</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="st">`</span><span class="at">QM</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">Mean Sq</span><span class="st">`</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    <span class="st">`</span><span class="at">Valor-F</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">F value</span><span class="st">`</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="st">`</span><span class="at">Pr(&gt;F)</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">Pr(&gt;F)</span><span class="st">`</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  )</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co"># Exibir tabela ANOVA com formatação</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>anova_df <span class="sc">|&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">md</span>(<span class="st">&quot;**Tabela - ANOVA do Modelo**&quot;</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  <span class="fu">tab_style</span>(</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">list</span>(<span class="fu">cell_text</span>(<span class="at">weight =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>),</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>                 <span class="fu">cell_fill</span>(<span class="at">color =</span> <span class="st">&quot;black&quot;</span>)),</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>    <span class="at">locations =</span> <span class="fu">cells_column_labels</span>()</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>  <span class="fu">tab_style</span>(</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">cell_text</span>(<span class="at">align =</span> <span class="st">&quot;center&quot;</span>),</span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>    <span class="at">locations =</span> <span class="fu">cells_body</span>(<span class="at">columns =</span> <span class="fu">everything</span>())</span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>  <span class="fu">fmt_number</span>(</span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">where</span>(is.numeric),</span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a>    <span class="at">decimals =</span> <span class="dv">3</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a>  )</span></code></pre></div>
 <div id="bwfzjheaqg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#bwfzjheaqg table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -1364,6 +1550,9 @@ height: 0px !important;
   
 </table>
 </div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Aplicação do teste Scott-Knott</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>sk <span class="ot">&lt;-</span> <span class="fu">SK</span>(modelo)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">summary</span>(sk)</span></code></pre></div>
 <pre><code>## Goups of means at sig.level = 0.05 
 ##              Means G1 G2
 ## LQR           5.38  a   

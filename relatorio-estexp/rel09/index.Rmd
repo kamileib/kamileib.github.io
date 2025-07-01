@@ -1,0 +1,208 @@
+---
+title: "Relatório 09"
+author: "Kaleb Aquino Mileib"
+date: "12/04/2022"
+header-includes:
+  - \usepackage{titling}
+  - \pretitle{\begin{center}
+    \includegraphics[width=2in,height=2in]{ufsj.png}\LARGE\\}
+  - \posttitle{\end{center}}
+toc-title: "Sumário"
+output:
+  
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: yes
+    number_sections: yes
+    includes:
+      in_header: logo.html
+  pdf_document:
+    
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+--- 
+# Objetivos
+
+Nesta etapa do estudo, busca-se responder a uma série de questões fundamentais relacionadas ao planejamento, execução e interpretação de um experimento fatorial triplo. São abordados o total de combinações de tratamentos e número de repetições realizadas, bem como as vantagens de se utilizar um delineamento fatorial em comparação a experimentos isolados. Também se investiga a presença de interações entre os fatores e como elas influenciam a interpretação dos efeitos principais. Além disso, analisa-se qual combinação de fatores resulta no menor erro de posicionamento, quais fatores possuem maior influência no desempenho do sistema, e quais gráficos são mais adequados para apoiar a interpretação dos resultados. Por fim, são discutidas recomendações para aplicação industrial e a adequação do delineamento adotado frente a possíveis fontes de variação externas.
+
+
+# ANOVA
+
+```{r}
+# Carregar pacote
+library(ExpDes.pt)
+
+# Criar o data frame com os dados
+dados <- data.frame(
+  motor = rep(c("Stepper", "Servo"), each = 30),
+  controle = rep(rep(c("PID", "Fuzzy"), each = 15), 2),
+  carga = rep(rep(c(0, 25, 50, 75, 100), each = 3), 4),
+  erro = c(
+    0.189,0.195,0.231, 0.231,0.233,0.264, 0.269,0.235,0.246,
+    0.281,0.314,0.297, 0.328,0.322,0.309, 0.216,0.190,0.141,
+    0.224,0.201,0.189, 0.226,0.209,0.215, 0.247,0.226,0.277,
+    0.293,0.267,0.315, 0.159,0.144,0.168, 0.198,0.196,0.194,
+    0.221,0.209,0.204, 0.242,0.236,0.246, 0.255,0.323,0.304,
+    0.108,0.122,0.121, 0.176,0.158,0.165, 0.179,0.179,0.207,
+    0.205,0.240,0.179, 0.262,0.252,0.254
+  )
+)
+
+# Converter os fatores para fator (necessário para análise correta)
+dados$motor <- factor(dados$motor)
+dados$controle <- factor(dados$controle)
+dados$carga <- factor(dados$carga)
+
+# ANOVA com aov()
+modelo_aov <- aov(erro ~ motor * controle * carga, data = dados)
+summary(modelo_aov)
+
+# Rodar análise fatorial tripla com ExpDes.pt
+fat3.dic(
+  fator1 = dados$motor,
+  fator2 = dados$controle,
+  fator3 = dados$carga,
+  resp = dados$erro,
+  quali = c(TRUE, TRUE, TRUE),
+  mcomp = "tukey",
+  fac.names = c("Motor", "Controle", "Carga"),
+  sigT = 0.05,
+  sigF = 0.05,
+  unfold = NULL
+)
+
+```
+
+# Perguntas
+
+## Primeira Questão
+
+**Qual é o total de combinações de tratamentos possíveis neste experimento? Quantas repetições foram realizadas por tratamento?**
+
+O número de combinações possíveis neste experimento é de **20**. São 2 tipos de motor, 2 métodos de controle e 5 níveis de carga, logo 2x2x5 = 20. 
+
+Para cada tratamento, foram realizadas 3 repetições, aumentando o número de combinações para **60**.
+
+## Segunda Questão
+
+**Qual é a principal vantagem de se utilizar um delineamento fatorial triplo em vez de três experimentos separados?**
+
+Um delineamento fatorial triplo completo permite avaliar efeitos principais de cada fator separadamente; Detectar interações entre fatores, como eles se relacionam e afetam a variável de resposta; E maximizar a eficiência, pois extrai mais informações com menos experimentos do que se fossem realizados separadamente para cada fator.
+
+## Terceira Questão
+
+**A interação entre os fatores foi significativa? Se sim, como isso influencia a interpretação dos efeitos principais?**
+
+Com base nos resultados da ANOVA, nenhuma das interações entre os fatores foi significativa ao nível de 5% de significância. As interações motor × controle (p = 0.915), motor × carga (p = 0.454), controle × carga (p = 0.957) e motor × controle × carga (p = 0.817) apresentaram valores-p elevados, indicando ausência de interação estatisticamente significativa. Isso significa que os efeitos principais de cada fator podem ser interpretados de forma independente, pois um fator não depende dos demais.
+
+## Quarta Questão
+
+**Com base nos resultados da ANAVA, qual combinação de fatores resulta no menor erro de posicionamento médio? Justifique sua resposta.**
+
+Embora os efeitos principais e interações não tenham sido estatisticamente significativos, é possível observar diferenças nas médias descritivas. A menor média de erro de posicionamento ocorreu com o motor Servo, sob controle Fuzzy, e com carga nula (0 N). Essa combinação apresentou uma média de erro inferior em relação às demais, sugerindo um desempenho potencialmente superior. No entanto, como essas diferenças não foram estatisticamente significativas, elas devem ser interpretadas com cautela, pois podem ser resultado da variabilidade natural dos dados.
+
+## Quinta Questão
+
+**Qual(is) fator(es) parece(m) ter maior influência no desempenho do sistema? Essa influência é consistente para todos os níveis dos outros fatores?**
+
+Nenhum dos fatores principais — tipo de motor, algoritmo de controle ou carga aplicada — apresentou efeito estatisticamente significativo sobre o erro de posicionamento (valores-p todos acima de 0,05). Portanto, não é possível afirmar que qualquer um deles tenha influência real sobre o desempenho do sistema. Como as interações também não foram significativas, não há evidência de que a influência de um fator dependa dos níveis dos outros. Assim, nenhuma influência consistente foi detectada com base na análise estatística.
+
+## Sexta Questão
+
+**Quais gráficos você utilizaria para auxiliar a interpretação dos resultados? Explique o porquê.**
+
+Para esta questão, foram utilizados gráficos Boxplot, de barras e gráficos de interação. Os dois primeiros mostram os valores de erro e sua distribuição em cada nível de motor e controle. Os gráficos de interação servem para realçar que não há ligação entre os 3 fatores, como comprovado pelo teste fatorial triplo. 
+
+```{r}
+# Carregar pacotes necessários
+library(ggplot2)
+library(dplyr)
+
+# 1. Boxplot por fator isolado
+ggplot(dados, aes(x = motor, y = erro)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Erro por tipo de motor", x = "Motor", y = "Erro de posicionamento")
+
+ggplot(dados, aes(x = controle, y = erro)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "Erro por tipo de controle", x = "Controle", y = "Erro de posicionamento")
+
+ggplot(dados, aes(x = carga, y = erro)) +
+  geom_boxplot(fill = "lightcoral") +
+  labs(title = "Erro por nível de carga", x = "Carga (%)", y = "Erro de posicionamento")
+
+# 2. Gráfico de interação: Motor x Controle
+dados %>%
+  group_by(motor, controle) %>%
+  summarise(media_erro = mean(erro)) %>%
+  ggplot(aes(x = motor, y = media_erro, color = controle, group = controle)) +
+  geom_line() + geom_point(size = 3) +
+  labs(title = "Interação entre Motor e Controle", y = "Média do Erro")
+
+# 3. Gráfico de interação: Controle x Carga
+dados %>%
+  group_by(controle, carga) %>%
+  summarise(media_erro = mean(erro)) %>%
+  ggplot(aes(x = carga, y = media_erro, color = controle, group = controle)) +
+  geom_line() + geom_point(size = 3) +
+  labs(title = "Interação entre Controle e Carga", x = "Carga (%)", y = "Média do Erro")
+
+# 4. Gráfico de médias com erro padrão (facetas por tipo de motor)
+dados %>%
+  group_by(motor, controle, carga) %>%
+  summarise(media = mean(erro), se = sd(erro)/sqrt(n())) %>%
+  ggplot(aes(x = carga, y = media, color = controle, group = controle)) +
+  geom_line() + geom_point() +
+  geom_errorbar(aes(ymin = media - se, ymax = media + se), width = 2) +
+  facet_wrap(~motor) +
+  labs(title = "Média do erro por carga e controle (facetas por motor)", x = "Carga (%)", y = "Erro médio")
+
+library(ggplot2)
+library(dplyr)
+
+# Calcular as médias por combinação de motor e controle
+media_motor_controle <- dados %>%
+  group_by(motor, controle) %>%
+  summarise(media_erro = mean(erro), .groups = "drop")
+
+# Criar gráfico de barras
+ggplot(media_motor_controle, aes(x = motor, y = media_erro, fill = controle)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  labs(
+    title = "Média do Erro por Tipo de Motor e Controle",
+    x = "Motor",
+    y = "Erro Médio de Posicionamento",
+    fill = "Controle"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  geom_text(aes(label = round(media_erro, 3)), 
+            vjust = -0.5, 
+            position = position_dodge(width = 0.8), 
+            size = 3.5)
+
+
+```
+
+## Sétima Questão
+
+**Considerando um cenário de aplicação industrial, em que precisão e economia de energia são importantes, qual motor e controle você recomendaria? Por quê?**
+
+Apesar de não significativos, a análise descritiva sugere que o motor Servo combinado com o controle Fuzzy apresentou as menores médias de erro de posicionamento. Porém, como não há correlação entre os fatores no sistema, talvez esta não sea a melhor combinação indicada. 
+
+## Oitava Questão
+
+**Qual o tipo de delineamento utilizado neste experimento? Por que ele é adequado para essa situação? Haveria algum outro delineamento mais indicado se existisse alguma fonte sistemática de variação, como temperatura ambiente?**
+
+O delineamento utilizado foi o Delineamento Inteiramente Casualizado (DIC) com arranjo fatorial triplo 2×2×5, adequado para situações onde não há fontes de variação conhecidas além dos fatores experimentais. O DIC permite alocar os tratamentos de forma aleatória, assumindo que todas as unidades experimentais são homogêneas. Se, no entanto, houvesse alguma fonte sistemática de variação não controlável — como temperatura ambiente, hora do dia ou operador —, seria mais apropriado usar um Delineamento em Blocos Casualizados (DBC). Isso permitiria isolar a variabilidade atribuída a essas fontes externas, aumentando a sensibilidade do experimento para detectar efeitos reais dos tratamentos.
+
+# Conclusão
+
+O experimento fatorial triplo realizado permitiu avaliar o efeito simultâneo de três fatores sobre o erro de posicionamento, sem identificar interações significativas entre eles. Embora nenhuma diferença estatisticamente relevante tenha sido encontrada, a análise descritiva indicou que a combinação do motor Servo com controle Fuzzy apresentou a menor média de erro, sugerindo um desempenho potencialmente melhor, considerando os dados que temos. O delineamento inteiramente casualizado adotado mostrou-se adequado para o controle das variáveis experimentais, mas, em situações com fontes sistemáticas de variação, delineamentos em blocos poderiam ser mais indicados. Em geral, os resultados fornecem uma base para futuras investigações e decisões sobre sistemas de controle em aplicações industriais.
+
